@@ -4,15 +4,14 @@
  * 该项目用于实现一个延时队列，从而可以优雅地执行一些定时任务。
  *
  */
-
 package timeWheel
 
 import (
-"container/list"
-"errors"
-"fmt"
-"sync"
-"time"
+	"container/list"
+	"errors"
+	"fmt"
+	"sync"
+	"time"
 )
 
 // TimeWheel的核心结构体
@@ -308,4 +307,3 @@ func (tw *TimeWheel) getPosAndCircleByCreatedTime(createdTime time.Time, d time.
 
 	return pos, circle
 }
-
