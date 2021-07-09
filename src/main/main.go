@@ -6,13 +6,6 @@ import (
 	"time"
 )
 
-func main() {
-	//read in csv document, save it to tasks
-	//var tasks map[int]int
-	//evenly distribute the document to 5 machines
-
-}
-
 func TaskJob(key interface{}) {
 	fmt.Println(fmt.Sprintf("%v This is a task job with key: %v", time.Now().Format(time.RFC3339), key))
 	//put it into log
@@ -39,21 +32,16 @@ func startTW() {
 		panic("TimeWheel is not running")
 	}
 
-	time.Sleep(10 * time.Second)
-
 	// 删除task
-	fmt.Println("Remove task task-5s")
-	err := tw.RemoveTask("task-5s")
-	if err != nil {
-		panic(err)
-	}
+	//fmt.Println("Remove task task-5s")
+	//err := tw.RemoveTask("task-5s")
+	//if err != nil {
+	//	panic(err)
+	//}
 
-
-	fmt.Println("Remove task task-2s")
-	err = tw.RemoveTask("task-2s")
-	if err != nil {
-		panic(err)
-	}
 	// 关闭时间轮盘
-	tw.Stop()
+	if tw.Finished() == true {
+		tw.Stop()
+	}
+	fmt.Println("finished tasks")
 }

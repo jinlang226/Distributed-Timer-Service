@@ -85,8 +85,8 @@ func New(interval time.Duration, slotNums int) *TimeWheel {
 		stopChannel:       make(chan bool),
 		taskRecords:       &sync.Map{},
 		//job:               job,
-		wait:              make(chan int, 1),
-		isRunning:         false,
+		wait:      make(chan int, 1),
+		isRunning: false,
 	}
 
 	tw.initSlots()
@@ -109,6 +109,17 @@ func (tw *TimeWheel) Stop() {
 // IsRunning 检查一下时间轮盘的是否在正常运行
 func (tw *TimeWheel) IsRunning() bool {
 	return tw.isRunning
+}
+
+func (tw *TimeWheel) Finished() bool {
+	tw.taskRecords.Range(func(k, v interface{}) bool {
+		if k == nil && v == nil {
+			return true
+		}
+		return false
+	})
+	
+	return false
 }
 
 // AddTask 向时间轮盘添加任务的开放函数
@@ -201,8 +212,8 @@ func (tw *TimeWheel) checkAndRunTask() {
 			// 执行任务时，Task.job是第一优先级，然后是TimeWheel.job
 			if task.job != nil {
 				go task.job(task.key)
-			//} else if tw.job != nil {
-			//	go tw.job(task.key)
+				//} else if tw.job != nil {
+				//	go tw.job(task.key)
 			} else {
 				fmt.Println(fmt.Sprintf("The task %d don't have job to run", task.key))
 			}
@@ -213,7 +224,6 @@ func (tw *TimeWheel) checkAndRunTask() {
 			currentList.Remove(item)
 
 			item = next
-
 			//// 重新添加任务到时间轮盘，用Task.interval来获取下一次执行的轮盘位置
 			//if task.times != 0 {
 			//	if task.times < 0 {
@@ -227,9 +237,14 @@ func (tw *TimeWheel) checkAndRunTask() {
 			// 将任务从taskRecords中删除
 			//tw.taskRecords.Delete(task.key)
 			//}
+
+			//delete task
+			err := tw.RemoveTask(task.key)
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
-
 	// 轮盘前进一步
 	if tw.currentPos == tw.slotNums-1 {
 		tw.currentPos = 0
