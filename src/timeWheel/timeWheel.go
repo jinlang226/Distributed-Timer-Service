@@ -4,7 +4,8 @@
  * 该项目用于实现一个延时队列，从而可以优雅地执行一些定时任务。
  *
  */
-package timeWheel
+
+package timewheel
 
 import (
 	"container/list"
@@ -32,7 +33,7 @@ type TimeWheel struct {
 	taskRecords *sync.Map
 	// 需要执行的任务，如果时间轮盘上的Task执行同一个Job，可以直接实例化到TimeWheel结构体中。
 	// 此处的优先级低于Task中的Job参数
-	job       Job
+	//job       Job
 	wait      chan int
 	isRunning bool
 }
@@ -55,22 +56,22 @@ type Task struct {
 	// 任务需要执行的Job，优先级高于TimeWheel中的Job
 	job Job
 	// 任务需要执行的次数，如果需要一直执行，设置成-1
-	times int
+	//times int
 }
 
 var tw *TimeWheel
 var once sync.Once
 
 // GetTimeWheel 用来实现TimeWheel的单例模式
-func GetTimeWheel(interval time.Duration, slotNums int, job Job) *TimeWheel {
+func GetTimeWheel(interval time.Duration, slotNums int) *TimeWheel {
 	once.Do(func() {
-		tw = New(interval, slotNums, job)
+		tw = New(interval, slotNums)
 	})
 	return tw
 }
 
 // New 初始化一个TimeWheel对象
-func New(interval time.Duration, slotNums int, job Job) *TimeWheel {
+func New(interval time.Duration, slotNums int) *TimeWheel {
 	if interval <= 0 || slotNums <= 0 {
 		return nil
 	}
@@ -83,7 +84,7 @@ func New(interval time.Duration, slotNums int, job Job) *TimeWheel {
 		removeTaskChannel: make(chan *Task),
 		stopChannel:       make(chan bool),
 		taskRecords:       &sync.Map{},
-		job:               job,
+		//job:               job,
 		wait:              make(chan int, 1),
 		isRunning:         false,
 	}
@@ -130,10 +131,9 @@ func (tw *TimeWheel) AddTask(interval time.Duration, key interface{}, createdTim
 		key:         key,
 		interval:    interval,
 		createdTime: createdTime,
-		job:         job,
-		times:       times,
+		//job:         job,
+		//times:       times,
 	}
-
 	return nil
 }
 
@@ -172,7 +172,7 @@ func (tw *TimeWheel) start() {
 			// 此处利用Task.createTime来定位任务在时间轮盘的位置和执行圈数
 			// 如果直接用任务的周期来定位位置，那么在服务重启的时候，任务周器相同的点会被定位到相同的卡槽，
 			// 会造成任务过度集中
-			tw.addTask(task, false)
+			tw.addTask(task)
 		case task := <-tw.removeTaskChannel:
 			tw.removeTask(task)
 		case <-tw.stopChannel:
@@ -201,8 +201,8 @@ func (tw *TimeWheel) checkAndRunTask() {
 			// 执行任务时，Task.job是第一优先级，然后是TimeWheel.job
 			if task.job != nil {
 				go task.job(task.key)
-			} else if tw.job != nil {
-				go tw.job(task.key)
+			//} else if tw.job != nil {
+			//	go tw.job(task.key)
 			} else {
 				fmt.Println(fmt.Sprintf("The task %d don't have job to run", task.key))
 			}
@@ -214,19 +214,19 @@ func (tw *TimeWheel) checkAndRunTask() {
 
 			item = next
 
-			// 重新添加任务到时间轮盘，用Task.interval来获取下一次执行的轮盘位置
-			if task.times != 0 {
-				if task.times < 0 {
-					tw.addTask(task, true)
-				} else {
-					task.times--
-					tw.addTask(task, true)
-				}
-
-			} else {
-				// 将任务从taskRecords中删除
-				tw.taskRecords.Delete(task.key)
-			}
+			//// 重新添加任务到时间轮盘，用Task.interval来获取下一次执行的轮盘位置
+			//if task.times != 0 {
+			//	if task.times < 0 {
+			//		tw.addTask(task, true)
+			//	} else {
+			//		task.times--
+			//		tw.addTask(task, true)
+			//	}
+			//
+			//} else {
+			// 将任务从taskRecords中删除
+			//tw.taskRecords.Delete(task.key)
+			//}
 		}
 	}
 
@@ -241,13 +241,8 @@ func (tw *TimeWheel) checkAndRunTask() {
 // 添加任务的内部函数
 // @param task       Task  Task对象
 // @param byInterval bool  生成Task在时间轮盘位置和圈数的方式，true表示利用Task.interval来生成，false表示利用Task.createTime生成
-func (tw *TimeWheel) addTask(task *Task, byInterval bool) {
-	var pos, circle int
-	if byInterval {
-		pos, circle = tw.getPosAndCircleByInterval(task.interval)
-	} else {
-		pos, circle = tw.getPosAndCircleByCreatedTime(task.createdTime, task.interval, task.key)
-	}
+func (tw *TimeWheel) addTask(task *Task) {
+	pos, circle := tw.getPosAndCircleByCreatedTime(task.createdTime, task.interval, task.key)
 
 	task.circle = circle
 	task.pos = pos
@@ -275,19 +270,20 @@ func (tw *TimeWheel) removeTask(task *Task) {
 	}()
 }
 
-// 该函数通过任务的周期来计算下次执行的位置和圈数
-func (tw *TimeWheel) getPosAndCircleByInterval(d time.Duration) (int, int) {
-	delaySeconds := int(d.Seconds())
-	intervalSeconds := int(tw.interval.Seconds())
-	circle := delaySeconds / intervalSeconds / tw.slotNums
-	pos := (tw.currentPos + delaySeconds/intervalSeconds) % tw.slotNums
-
-	// 特殊case，当计算的位置和当前位置重叠时，因为当前位置已经走过了，所以circle需要减一
-	if pos == tw.currentPos && circle != 0 {
-		circle--
-	}
-	return pos, circle
-}
+//
+//// 该函数通过任务的周期来计算下次执行的位置和圈数
+//func (tw *TimeWheel) getPosAndCircleByInterval(d time.Duration) (int, int) {
+//	delaySeconds := int(d.Seconds())
+//	intervalSeconds := int(tw.interval.Seconds())
+//	circle := delaySeconds / intervalSeconds / tw.slotNums
+//	pos := (tw.currentPos + delaySeconds/intervalSeconds) % tw.slotNums
+//
+//	// 特殊case，当计算的位置和当前位置重叠时，因为当前位置已经走过了，所以circle需要减一
+//	if pos == tw.currentPos && circle != 0 {
+//		circle--
+//	}
+//	return pos, circle
+//}
 
 // 该函数用任务的创建时间来计算下次执行的位置和圈数
 func (tw *TimeWheel) getPosAndCircleByCreatedTime(createdTime time.Time, d time.Duration, key interface{}) (int, int) {
