@@ -188,7 +188,6 @@ func (tw *TimeWheel) start() {
 
 // 检查该轮盘点位上的Task，看哪个需要执行
 func (tw *TimeWheel) checkAndRunTask() {
-
 	// 获取该轮盘位置的双向链表
 	currentList := tw.slots[tw.currentPos]
 
@@ -275,8 +274,9 @@ func (tw *TimeWheel) removeTask(task *Task) {
 	// 通过TimeWheel.slots获取任务的
 	currentList := tw.slots[task.pos]
 	currentList.Remove(val.(*list.Element))
-	//to do
+	//todo
 	//write log, mark as complete
+
 
 	//write to the local cache
 	tw.finishedTasks.Store(task.key, -1)
