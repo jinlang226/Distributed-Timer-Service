@@ -29,7 +29,7 @@ type TimeWheel struct {
 	//job       Job
 	wait          chan int
 	isRunning     bool
-	finishedTasks *sync.Map
+	finishedTasks *sync.Map //update according to the logs by RPC
 }
 
 // 需要执行的Job的函数结构体
@@ -274,12 +274,14 @@ func (tw *TimeWheel) removeTask(task *Task) {
 	// 通过TimeWheel.slots获取任务的
 	currentList := tw.slots[task.pos]
 	currentList.Remove(val.(*list.Element))
-	//todo
-	//write log, mark as complete
-
 
 	//write to the local cache
 	tw.finishedTasks.Store(task.key, -1)
+
+	//todo
+	//write log, mark as completed by paxos
+	//send RPC calls to other severs
+
 	defer func() {
 		<-tw.wait
 	}()
@@ -302,7 +304,6 @@ func (tw *TimeWheel) removeTask(task *Task) {
 
 // 该函数用任务的创建时间来计算下次执行的位置和圈数
 func (tw *TimeWheel) getPosAndCircleByCreatedTime(createdTime time.Time, d time.Duration, key interface{}) (int, int) {
-
 	passedTime := time.Since(createdTime)
 	passedSeconds := int(passedTime.Seconds())
 	delaySeconds := int(d.Seconds())
