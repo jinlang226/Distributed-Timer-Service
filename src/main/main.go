@@ -26,7 +26,7 @@ func startTW() {
 		//for uuid, interval in each line:
 		uuid := 0
 		interval := 2 * time.Second
-		fmt.Println(fmt.Sprintf("%v Add task id: %d", time.Now().Format(time.RFC3339)), uuid)
+		fmt.Println(fmt.Sprintf("%s Add Task ID: %d", time.Now().Format("2006/1/2 15:04:05"), uuid))
 		err := tw.AddTask(interval, uuid, time.Now(), TaskJob)
 		//rpc calls to at least two other servers
 		if err != nil {
