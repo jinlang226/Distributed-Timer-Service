@@ -2,9 +2,12 @@ package main
 
 import (
 	"fmt"
-	TimeWheel "mod/src/timeWheel"
+	"modu/src/timeWheel"
 	"time"
 )
+func main() {
+	startTW()
+}
 
 func TaskJob(key interface{}) {
 	fmt.Println(fmt.Sprintf("%v This is a task job with key: %v", time.Now().Format(time.RFC3339), key))
@@ -13,7 +16,7 @@ func TaskJob(key interface{}) {
 
 func startTW() {
 	//初始化一个时间间隔是1s，一共有60个齿轮的时间轮盘，默认轮盘转动一圈的时间是60s
-	tw := TimeWheel.GetTimeWheel(1*time.Second, 60)
+	tw := timeWheel.GetTimeWheel(1*time.Second, 60)
 
 	// 启动时间轮盘
 	tw.Start()

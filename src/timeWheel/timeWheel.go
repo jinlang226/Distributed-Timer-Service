@@ -1,11 +1,4 @@
-/*
- * timewheel
- *
- * 该项目用于实现一个延时队列，从而可以优雅地执行一些定时任务。
- *
- */
-
-package timewheel
+package timeWheel
 
 import (
 	"container/list"
@@ -119,7 +112,6 @@ func (tw *TimeWheel) Finished() bool {
 		}
 		return false
 	})
-
 	return false
 }
 
@@ -286,6 +278,7 @@ func (tw *TimeWheel) removeTask(task *Task) {
 	currentList.Remove(val.(*list.Element))
 	//to do
 	//write log, mark as complete
+
 	//write to the local cache
 	tw.finishedTasks.Store(task.key, -1)
 	defer func() {
