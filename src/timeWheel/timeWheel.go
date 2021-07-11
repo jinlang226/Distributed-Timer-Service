@@ -34,8 +34,9 @@ type TimeWheel struct {
 	// 需要执行的任务，如果时间轮盘上的Task执行同一个Job，可以直接实例化到TimeWheel结构体中。
 	// 此处的优先级低于Task中的Job参数
 	//job       Job
-	wait      chan int
-	isRunning bool
+	wait          chan int
+	isRunning     bool
+	finishedTasks *sync.Map
 }
 
 // 需要执行的Job的函数结构体
@@ -118,7 +119,7 @@ func (tw *TimeWheel) Finished() bool {
 		}
 		return false
 	})
-	
+
 	return false
 }
 
@@ -126,7 +127,7 @@ func (tw *TimeWheel) Finished() bool {
 // @param interval    任务的周期
 // @param key         任务的key，必须是唯一的，否则添加任务的时候会失败
 // @param createTime  任务的创建时间
-func (tw *TimeWheel) AddTask(interval time.Duration, key interface{}, createdTime time.Time, times int, job Job) error {
+func (tw *TimeWheel) AddTask(interval time.Duration, key interface{}, createdTime time.Time, job Job) error {
 	if interval <= 0 || key == nil {
 		return errors.New("Invalid task params")
 	}
@@ -203,12 +204,15 @@ func (tw *TimeWheel) checkAndRunTask() {
 		for item := currentList.Front(); item != nil; {
 			task := item.Value.(*Task)
 			// 如果圈数>0，表示还没到执行时间，更新圈数
+			_, existed := tw.finishedTasks.Load(task.key)
+			if existed {
+				continue
+			}
 			if task.circle > 0 {
 				task.circle--
 				item = item.Next()
 				continue
 			}
-
 			// 执行任务时，Task.job是第一优先级，然后是TimeWheel.job
 			if task.job != nil {
 				go task.job(task.key)
@@ -243,6 +247,7 @@ func (tw *TimeWheel) checkAndRunTask() {
 			if err != nil {
 				panic(err)
 			}
+
 		}
 	}
 	// 轮盘前进一步
@@ -279,7 +284,10 @@ func (tw *TimeWheel) removeTask(task *Task) {
 	// 通过TimeWheel.slots获取任务的
 	currentList := tw.slots[task.pos]
 	currentList.Remove(val.(*list.Element))
-
+	//to do
+	//write log, mark as complete
+	//write to the local cache
+	tw.finishedTasks.Store(task.key, -1)
 	defer func() {
 		<-tw.wait
 	}()
