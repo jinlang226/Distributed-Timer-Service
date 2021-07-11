@@ -43,9 +43,6 @@ func startTW() {
 	//	panic(err)
 	//}
 
-	// 关闭时间轮盘
-	if tw.Finished() == true {
-		tw.Stop()
-	}
+
 	fmt.Println("finished tasks")
 }

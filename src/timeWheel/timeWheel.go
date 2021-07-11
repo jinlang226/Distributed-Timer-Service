@@ -239,7 +239,6 @@ func (tw *TimeWheel) checkAndRunTask() {
 			if err != nil {
 				panic(err)
 			}
-
 		}
 	}
 	// 轮盘前进一步
@@ -316,6 +315,5 @@ func (tw *TimeWheel) getPosAndCircleByCreatedTime(createdTime time.Time, d time.
 	if pos == tw.currentPos && circle != 0 {
 		circle--
 	}
-
 	return pos, circle
 }
