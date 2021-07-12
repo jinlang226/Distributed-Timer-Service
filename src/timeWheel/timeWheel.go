@@ -281,6 +281,8 @@ func (tw *TimeWheel) removeTask(task *Task) {
 	//todo
 	//write log, mark as completed by paxos
 	//send RPC calls to other severs
+	//removeTime := time.Now().Format("2006/1/2 15:04:05")
+	//writeData :=
 
 	defer func() {
 		<-tw.wait

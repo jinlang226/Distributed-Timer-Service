@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"modu/src/network"
 	"modu/src/timeWheel"
 	"time"
-	"modu/src/network"
 )
 
 // receive tasks from Client, parameter from client might be string, need parsing interval and uuid from it.
@@ -20,13 +20,18 @@ func Register(interval time.Duration, uuid int) {
 
 // scan the csv
 func BatchRegister(tw *timeWheel.TimeWheel) {
+	result, err := readFile(filepath + "/" + filename)
+	if err!= nil {
+		fmt.Println("err in read file")
+	}
 	//for each line in csv data structure:
-	//for line in csv  {
-	//uuid, interval need to be split from line
-	interval := 2 * time.Second
-	uuid := 0
-	Register(interval, uuid)
-	//}
+	for _, tasks := range result {
+		for _, items := range tasks {
+			duration := time.Duration(items[1]) * time.Second
+			uuid := int(items[0])
+			Register(duration, uuid)
+		}
+	}
 }
 
 // rpc calling, public method

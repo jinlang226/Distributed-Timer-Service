@@ -11,7 +11,6 @@ import (
 	"time"
 )
 
-
 const (
 	Socketname1 string = "IP1"
 	Socketname2 string = "IP2"
