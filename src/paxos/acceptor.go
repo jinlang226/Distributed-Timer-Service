@@ -17,7 +17,6 @@ type Acceptor struct {
 	acceptedNumber int
 	// 接受者已接受的提案的值，如果没有接受任何提案则为 nil
 	acceptedValue interface{}
-
 	// 学习者 id 列表
 	learners []int
 }

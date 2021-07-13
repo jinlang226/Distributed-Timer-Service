@@ -41,7 +41,7 @@ func (l *Learner) Learn(args *MsgArgs, reply *MsgReply) error {
 	return nil
 }
 
-func (l *Learner) chosen() interface{} {
+func (l *Learner) Chosen() interface{} {
 	acceptCounts := make(map[int]int)
 	acceptMsg := make(map[int]MsgArgs)
 

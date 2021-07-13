@@ -13,7 +13,7 @@ type Proposer struct {
 	acceptors []int
 }
 
-func (p *Proposer) propose(v interface{}) interface{} {
+func (p *Proposer) Propose(v interface{}) interface{} {
 	p.round++
 	p.number = p.proposalNumber()
 

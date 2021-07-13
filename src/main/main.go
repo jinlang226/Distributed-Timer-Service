@@ -2,17 +2,26 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-playground/log"
+	"modu/src/paxos"
 	"modu/src/timeWheel"
 	"time"
 )
 
-const format string = "2006/1/2 15:04:05"
-var tw *timeWheel.TimeWheel
-var filename = "idk"
-var filepath = "wholePathName"
-
 func main() {
 	tw := startServer()
+	_, learns, p := paxos.StartPaxos()
+
+	value := p.Propose("hello world")
+	if value != "hello world" {
+		log.Error("value = %s, excepted %s", value, "hello world")
+	}
+
+	learnValue := learns[0].Chosen()
+	if learnValue != value {
+		log.Error("learnValue = %s, excepted %s", learnValue, "hello world")
+	}
+
 	BatchRegister(tw)
 
 }
