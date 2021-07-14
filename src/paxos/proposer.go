@@ -57,8 +57,7 @@ func (p *Proposer) Propose(v interface{}) interface{} {
 				To: aid,
 			}
 			reply := new(MsgReply)
-			//todo
-			//change the address
+			//todo change the address
 			ok := call(fmt.Sprintf("127.0.0.1:%d", aid), "Acceptor.Accept", args, reply)
 			if !ok {
 				continue
@@ -72,8 +71,7 @@ func (p *Proposer) Propose(v interface{}) interface{} {
 
 	if acceptCount >= p.majority() {
 		// 选择的提案的值
-		//todo
-		//rpc to acceptors to save value
+		//todo rpc to acceptors to save value
 		return v
 	}
 	return nil

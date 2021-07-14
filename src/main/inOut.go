@@ -101,6 +101,8 @@ func readFile(filename string) ([][]string, error) {
 // writeCsvByLine 写入一行数据
 func writeCsvByLine(path string, dataStruct *writeDataByLine) error {
 	//todo: bugs might remain, need mutex
+	tw.Lock()
+	defer tw.Unlock()
 	//OpenFile 读取文件，不存在时则创建，使用追加模式
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
 	if err != nil {

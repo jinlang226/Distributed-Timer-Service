@@ -32,6 +32,7 @@ type TimeWheel struct {
 	wait          chan int
 	isRunning     bool
 	finishedTasks *sync.Map //update according to the logs by RPC
+	sync.Mutex
 }
 
 // 需要执行的Job的函数结构体
