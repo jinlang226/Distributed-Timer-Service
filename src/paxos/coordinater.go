@@ -1,7 +1,13 @@
 package paxos
 
-var acceptorIds = []int{1001, 1002, 1003}
-var learnerIds = []int{2001}
+var serverID1 = 1
+var serverID2 = 2
+var serverID3 = 3
+var serverID4 = 4
+var serverID5 = 5
+
+var acceptorIds = []int{serverID2, serverID3, serverID4}
+var learnerIds = []int{serverID5}
 
 // 启动接受者和学习者 RPC 服务
 func start(acceptorIds []int, learnerIds []int) ([]*Acceptor, []*Learner) {

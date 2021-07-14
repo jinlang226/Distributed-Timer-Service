@@ -3,11 +3,10 @@ package main
 import (
 	"encoding/csv"
 	"fmt"
+	"github.com/go-playground/log"
 	"os"
 	"strconv"
 	"time"
-
-	"github.com/go-playground/log"
 )
 
 //const (
@@ -75,33 +74,34 @@ func readFile(filename string) ([][]string, error) {
 //}
 
 // writeCsv 写入csv文件
-func writeCsv(path string, data map[string]string) error {
-	for taskId, duration := range data {
-		// 记录开始睡眠的时间点
-		startTime := time.Now().Unix()
-		// 睡眠duration
-		sleepDuration, err := strconv.Atoi(duration)
-		if err != nil {
-			log.Error(err)
-		}
-		// 睡眠
-		time.Sleep(time.Duration(sleepDuration) * time.Second)
-		// 记录睡眠结束时间点
-		stopTime := time.Now().Unix()
-		// 写入的csv行数据：对应map中的一个KV
-		writeDataLine := []string{taskId, duration, strconv.FormatInt(startTime, 10), strconv.FormatInt(stopTime, 10)}
-		log.Info("write data by line: ", writeDataLine)
-		// 写入一行数据
-		if err := writeCsvByLine(path, writeDataLine); err != nil {
-			log.Error(err)
-		}
-	}
-	return nil
-}
+//func writeCsv(path string, data map[string]string) error {
+//	for taskId, duration := range data {
+//		// 记录开始睡眠的时间点
+//		startTime := time.Now().Unix()
+//		// 睡眠duration
+//		sleepDuration, err := strconv.Atoi(duration)
+//		if err != nil {
+//			log.Error(err)
+//		}
+//		// 睡眠
+//		time.Sleep(time.Duration(sleepDuration) * time.Second)
+//		// 记录睡眠结束时间点
+//		stopTime := time.Now().Unix()
+//		// 写入的csv行数据：对应map中的一个KV
+//		writeDataLine := []string{taskId, duration, strconv.FormatInt(startTime, 10), strconv.FormatInt(stopTime, 10)}
+//		log.Info("write data by line: ", writeDataLine)
+//		// 写入一行数据
+//		if err := writeCsvByLine(path, writeDataLine); err != nil {
+//			log.Error(err)
+//		}
+//	}
+//	return nil
+//}
 
 // writeCsvByLine 写入一行数据
-func writeCsvByLine(path string, writeData []string) error {
-	// OpenFile 读取文件，不存在时则创建，使用追加模式
+func writeCsvByLine(path string, dataStruct *writeDataByLine) error {
+	//todo: bugs might remain, need mutex
+	//OpenFile 读取文件，不存在时则创建，使用追加模式
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
 	if err != nil {
 		log.Error(err)
@@ -111,8 +111,14 @@ func writeCsvByLine(path string, writeData []string) error {
 	// 创建写入接口
 	WriterCsv := csv.NewWriter(file)
 
+	startTime := strconv.Itoa(int(dataStruct.startTime))
+	stopTime := strconv.Itoa(int(dataStruct.stopTime))
+	taskId:=fmt.Sprintf("%v", dataStruct.taskId)
+	duration:= fmt.Sprintf("%v", (dataStruct.duration)*time.Second)
+	dataLine := []string{taskId, duration, startTime, stopTime}
+
 	// 写数据
-	if err := WriterCsv.Write(writeData); err != nil {
+	if err := WriterCsv.Write(dataLine); err != nil {
 		log.Error(err)
 	}
 

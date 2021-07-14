@@ -54,6 +54,7 @@ func (l *Learner) Chosen() interface{} {
 
 	for n, count := range acceptCounts {
 		if count >= l.majority() {
+			//todo rpc to learners to save value in logs and local map
 			return acceptMsg[n].Value
 		}
 	}

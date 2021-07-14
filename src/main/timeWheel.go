@@ -1,10 +1,12 @@
-package timeWheel
+package main
 
 import (
 	"container/list"
 	"errors"
 	"fmt"
+	"github.com/go-playground/log"
 	"sync"
+
 	"time"
 )
 
@@ -53,7 +55,6 @@ type Task struct {
 	//times int
 }
 
-var tw *TimeWheel
 var once sync.Once
 
 // GetTimeWheel 用来实现TimeWheel的单例模式
@@ -265,6 +266,15 @@ func (tw *TimeWheel) addTask(task *Task) {
 	}()
 }
 
+func WriteToMap(key interface{}) {
+	tw.finishedTasks.Store(key, 01)
+}
+
+//todo 机器宕机之后，读log恢复map
+func traverseMap() {
+
+}
+
 // 删除任务的内部函数
 func (tw *TimeWheel) removeTask(task *Task) {
 	// 从map结构中删除
@@ -276,20 +286,35 @@ func (tw *TimeWheel) removeTask(task *Task) {
 	currentList.Remove(val.(*list.Element))
 
 	//write to the local cache
-	tw.finishedTasks.Store(task.key, -1)
+	WriteToMap(task.key)
 
-	//todo
-	//write log, mark as completed by paxos
+	data := &writeDataByLine{
+		stopTime : time.Now().Unix(),
+		taskId   : task.key,
+		duration  :task.interval,
+		startTime: task.createdTime.Unix(),
+	}
+
+	//need to check
+	//write to local log
+	writeCsvByLine(filepath+filename, data)
+
+	//write to other servers' log, mark as completed by paxos
+	value := proposer.Propose(data)
 	//send RPC calls to other severs
-	//removeTime := time.Now().Format("2006/1/2 15:04:05")
-	//writeData :=
+	if value != data { //bugs
+		log.Error("value = %s, excepted %s", value, "hello world")
+	}
+	learnValue := learners[0].Chosen()
+	if learnValue != value {
+		log.Error("learnValue = %s, excepted %s", learnValue, "hello world")
+	}
 
 	defer func() {
 		<-tw.wait
 	}()
 }
 
-//
 //// 该函数通过任务的周期来计算下次执行的位置和圈数
 //func (tw *TimeWheel) getPosAndCircleByInterval(d time.Duration) (int, int) {
 //	delaySeconds := int(d.Seconds())

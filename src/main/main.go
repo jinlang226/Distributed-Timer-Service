@@ -2,33 +2,25 @@ package main
 
 import (
 	"fmt"
-	"github.com/go-playground/log"
 	"modu/src/paxos"
-	"modu/src/timeWheel"
 	"time"
 )
 
+var acceptors []*paxos.Acceptor
+var learners []*paxos.Learner
+var proposer *paxos.Proposer
+
 func main() {
-	tw := startServer()
-	_, learns, p := paxos.StartPaxos()
-
-	value := p.Propose("hello world")
-	if value != "hello world" {
-		log.Error("value = %s, excepted %s", value, "hello world")
-	}
-
-	learnValue := learns[0].Chosen()
-	if learnValue != value {
-		log.Error("learnValue = %s, excepted %s", learnValue, "hello world")
-	}
-
-	BatchRegister(tw)
-
+	startServer()
+	acceptors, learners, proposer = paxos.StartPaxos()
+	BatchRegister()
 }
 
-func startServer() *timeWheel.TimeWheel {
+
+
+func startServer() *TimeWheel {
 	//初始化一个时间间隔是1s，一共有60个齿轮的时间轮盘，默认轮盘转动一圈的时间是60s
-	tw := timeWheel.GetTimeWheel(1*time.Second, 60)
+	tw := GetTimeWheel(1*time.Second, 60)
 	tw.Start() // start tw
 	fmt.Println("start doing tasks")
 	return tw
