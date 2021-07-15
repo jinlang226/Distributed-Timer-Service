@@ -71,7 +71,7 @@ func (p *Proposer) Propose(v interface{}) interface{} {
 
 	if acceptCount >= p.majority() {
 		// 选择的提案的值
-		//todo rpc to acceptors to save value
+		//todo save locally
 		return v
 	}
 	return nil

@@ -16,8 +16,6 @@ func main() {
 	BatchRegister()
 }
 
-
-
 func startServer() *TimeWheel {
 	//初始化一个时间间隔是1s，一共有60个齿轮的时间轮盘，默认轮盘转动一圈的时间是60s
 	tw := GetTimeWheel(1*time.Second, 60)
