@@ -298,7 +298,7 @@ func (tw *TimeWheel) removeTask(task *Task) {
 
 	//need to check
 	//write to local log
-	writeCsvByLine(filepath+filename, data)
+	WriteCsvByLine(filepath+filename, data)
 
 	//write to other servers' log, mark as completed by paxos
 	value := proposer.Propose(data)

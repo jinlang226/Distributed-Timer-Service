@@ -91,15 +91,15 @@ func readFile(filename string) ([][]string, error) {
 //		writeDataLine := []string{taskId, duration, strconv.FormatInt(startTime, 10), strconv.FormatInt(stopTime, 10)}
 //		log.Info("write data by line: ", writeDataLine)
 //		// 写入一行数据
-//		if err := writeCsvByLine(path, writeDataLine); err != nil {
+//		if err := WriteCsvByLine(path, writeDataLine); err != nil {
 //			log.Error(err)
 //		}
 //	}
 //	return nil
 //}
 
-// writeCsvByLine 写入一行数据
-func writeCsvByLine(path string, dataStruct *writeDataByLine) error {
+// WriteCsvByLine 写入一行数据
+func WriteCsvByLine(path string, dataStruct *writeDataByLine) error {
 	//todo: bugs might remain, need mutex
 	tw.Lock()
 	defer tw.Unlock()

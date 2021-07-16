@@ -35,6 +35,7 @@ func (l *Learner) Learn(args *MsgArgs, reply *MsgReply) error {
 	if a.Number < args.Number {
 		l.acceptedMsg[args.From] = *args
 		reply.Ok = true
+
 	} else {
 		reply.Ok = false
 	}
@@ -54,7 +55,7 @@ func (l *Learner) Chosen() interface{} {
 
 	for n, count := range acceptCounts {
 		if count >= l.majority() {
-			//todo rpc to learners to save value in logs and local map
+			//todo save value in logs and local map
 			return acceptMsg[n].Value
 		}
 	}
