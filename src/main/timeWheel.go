@@ -4,8 +4,9 @@ import (
 	"container/list"
 	"errors"
 	"fmt"
-	"github.com/go-playground/log"
 	"sync"
+
+	"github.com/go-playground/log"
 
 	"time"
 )
@@ -107,28 +108,38 @@ func (tw *TimeWheel) IsRunning() bool {
 	return tw.isRunning
 }
 
-func (tw *TimeWheel) Finished() bool {
+type foo struct {
+	bar bool
+}
+
+func (tw *TimeWheel) Finished(args interface{}, reply foo) error {
 	tw.taskRecords.Range(func(k, v interface{}) bool {
 		if k == nil && v == nil {
+			reply.bar = true
 			return true
 		}
+		reply.bar = false
 		return false
 	})
-	return false
+	return nil
 }
 
 // AddTask 向时间轮盘添加任务的开放函数
 // @param interval    任务的周期
 // @param key         任务的key，必须是唯一的，否则添加任务的时候会失败
 // @param createTime  任务的创建时间
-func (tw *TimeWheel) AddTask(interval time.Duration, key interface{}, createdTime time.Time, job Job) error {
+// func (tw *TimeWheel) AddTask(interval time.Duration, key interface{}, createdTime time.Time, job Job) error {
+func (tw *TimeWheel) AddTask(args AddTaskArgs, reply AddTaskReply) error {
+	interval := args.interval
+	key := args.taskJob
+	createdTime := args.execTime
 	if interval <= 0 || key == nil {
 		return errors.New("Invalid task params")
 	}
 
 	// 检查Task.Key是否已经存在
-	_, ok := tw.taskRecords.Load(key)
-	if ok {
+	_, exist := tw.taskRecords.Load(key)
+	if exist {
 		return errors.New("Duplicate task key")
 	}
 
