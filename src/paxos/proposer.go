@@ -15,7 +15,7 @@ type Proposer struct {
 	acceptors []int
 }
 
-func (p *Proposer) Propose(v interface{}) interface{} {
+func (p *Proposer) Propose(v *message.WriteDataByLine) interface{} {
 	p.round++
 	p.number = p.proposalNumber()
 

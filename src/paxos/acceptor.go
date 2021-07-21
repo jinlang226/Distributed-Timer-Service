@@ -9,7 +9,7 @@ import (
 )
 
 type Acceptor struct {
-	lis  net.Listener
+	lis net.Listener
 	// 服务器 id
 	id int
 	// 接受者承诺的提案编号，如果为 0 表示接受者没有收到过任何 Prepare 消息
@@ -17,14 +17,14 @@ type Acceptor struct {
 	// 接受者已接受的提案编号，如果为 0 表示没有接受任何提案
 	acceptedNumber int
 	// 接受者已接受的提案的值，如果没有接受任何提案则为 nil
-	acceptedValue interface{}
+	acceptedValue *message.WriteDataByLine
 	// 学习者 id 列表
 	learners []int
 }
 
 func newAcceptor(id int, learners []int) *Acceptor {
 	acceptor := &Acceptor{
-		id: id,
+		id:       id,
 		learners: learners,
 	}
 	acceptor.server()
@@ -72,7 +72,7 @@ func (a *Acceptor) Accept(args *MsgArgs, reply *MsgReply) error {
 	return nil
 }
 
-func (a *Acceptor) server()  {
+func (a *Acceptor) server() {
 	rpcs := rpc.NewServer()
 	rpcs.Register(a)
 	addr := fmt.Sprintf(":%d", a.id)

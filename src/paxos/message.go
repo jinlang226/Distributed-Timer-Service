@@ -15,7 +15,7 @@ type MsgArgs struct {
 type MsgReply struct {
 	Ok     bool
 	Number int
-	Value  interface{}
+	Value  *message.WriteDataByLine
 }
 
 func call(srv string, name string, args interface{}, reply interface{}) bool {

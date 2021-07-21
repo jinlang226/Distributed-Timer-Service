@@ -11,6 +11,7 @@ import (
 func main() {
 	message.TW = startServer()
 	message.Acceptors, message.Learners, message.Proposer = paxos.StartPaxos()
+	InitializeRPC()
 	BatchRegister()
 }
 

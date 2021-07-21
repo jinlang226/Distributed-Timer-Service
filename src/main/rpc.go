@@ -27,8 +27,8 @@ type RPCBackupReply struct {
 //}
 
 // This method starts a RPC server
-func (tw *timeWheel.TimeWheel) InitializeRPC() {
-	rpc.Register(tw)
+func InitializeRPC() {
+	rpc.Register(message.TW)
 	l, err := net.Listen("tcp", message.LocalName)
 	if err != nil {
 		log.Error("listen error:", err)
