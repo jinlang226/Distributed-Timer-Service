@@ -1,4 +1,4 @@
-package main
+package message
 
 import (
 	"encoding/csv"
@@ -28,8 +28,8 @@ import (
 //	}
 //}
 
-// readFile reads csv file
-func readFile(filename string) ([][]string, error) {
+// ReadFile reads csv file
+func ReadFile(filename string) ([][]string, error) {
 	csvFile, err := os.Open(filename)
 	if err != nil {
 		fmt.Printf("read file error: %v", err)
@@ -98,11 +98,11 @@ func readFile(filename string) ([][]string, error) {
 //	return nil
 //}
 
-// WriteCsvByLine 写入一行数据
-func WriteCsvByLine(path string, dataStruct *writeDataByLine) error {
+//  写入一行数据
+func WriteCsvByLine(path string, dataStruct *WriteDataByLine) error {
 	//todo: bugs might remain, need mutex
-	tw.Lock()
-	defer tw.Unlock()
+	TW.Lock()
+	defer TW.Unlock()
 
 	//OpenFile 读取文件，不存在时则创建，使用追加模式
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
@@ -114,10 +114,10 @@ func WriteCsvByLine(path string, dataStruct *writeDataByLine) error {
 	// 创建写入接口
 	WriterCsv := csv.NewWriter(file)
 
-	startTime := strconv.Itoa(int(dataStruct.startTime))
-	stopTime := strconv.Itoa(int(dataStruct.stopTime))
-	taskId:=fmt.Sprintf("%v", dataStruct.taskId)
-	duration:= fmt.Sprintf("%v", (dataStruct.duration)*time.Second)
+	startTime := strconv.Itoa(int(dataStruct.StartTime))
+	stopTime := strconv.Itoa(int(dataStruct.StopTime))
+	taskId:=fmt.Sprintf("%v", dataStruct.TaskId)
+	duration:= fmt.Sprintf("%v", (dataStruct.Duration)*time.Second)
 	dataLine := []string{taskId, duration, startTime, stopTime}
 
 	// 写数据

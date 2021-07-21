@@ -1,18 +1,15 @@
 package paxos
 
 import (
+	"modu/src/message"
 	"net/rpc"
 )
 
 type MsgArgs struct {
-	// 提案编号
-	Number int
-	// 提案的值
-	Value  interface{}
-	// 发送者 id
-	From   int
-	// 接收者 id
-	To     int
+	Number int                      // 提案编号
+	Value  *message.WriteDataByLine // 提案的值
+	From   int                      // 发送者 id
+	To     int                      // 接收者 id
 }
 
 type MsgReply struct {

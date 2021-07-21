@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"modu/src/message"
 	"time"
 )
 
@@ -18,7 +19,7 @@ func Register(interval time.Duration, uuid int) {
 
 // scan the csv
 func BatchRegister() {
-	result, err := readFile(filepath + "/" + filename)
+	result, err := message.ReadFile(message.Filepath + "/" + message.Filename)
 	if err != nil {
 		fmt.Println("err in read file")
 	}
@@ -45,8 +46,8 @@ func Backup(args *RPCBackupArgs, reply *RPCBackupReply) error {
 
 // register tasks
 func register(interval time.Duration, uuid int) {
-	fmt.Println(fmt.Sprintf("%s Add Task ID: %d", time.Now().Format(format), uuid))
-	err := tw.AddTask(interval, uuid, time.Now(), TaskJob)
+	fmt.Println(fmt.Sprintf("%s Add Task ID: %d", time.Now().Format(message.Format), uuid))
+	err := message.TW.AddTask(interval, uuid, time.Now(), TaskJob)
 	if err != nil {
 		panic(err)
 	}
@@ -55,8 +56,8 @@ func register(interval time.Duration, uuid int) {
 func backup(args RPCBackupArgs) {
 	reply := RPCBackupReply{}
 	// call method is defined in
-	for _, socketName:= range socketNames {
-		if socketName != localName {
+	for _, socketName:= range message.SocketNames {
+		if socketName != message.LocalName {
 			if ok := call(socketName, "Backup", args, &reply); !ok {
 				fmt.Printf("Register: backup register error\n")
 			}

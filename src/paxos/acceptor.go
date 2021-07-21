@@ -3,6 +3,7 @@ package paxos
 import (
 	"fmt"
 	"log"
+	"modu/src/message"
 	"net"
 	"net/rpc"
 )
@@ -50,20 +51,21 @@ func (a *Acceptor) Accept(args *MsgArgs, reply *MsgReply) error {
 		reply.Ok = true
 		//todo save value
 
+		message.WriteCsvByLine(message.Filepath+message.Filename, args.Value)
 		// 后台转发接受的提案给学习者
-		for _, lid := range a.learners {
-			go func(learner int) {
-				//todo change the address
-				addr := fmt.Sprintf("127.0.0.1:%d", learner)
-				args.From = a.id
-				args.To = learner
-				resp := new(MsgReply)
-				ok := call(addr, "Learner.Learn", args, resp)
-				if !ok {
-					return
-				}
-			}(lid)
-		}
+		//for _, lid := range a.learners {
+		//	go func(learner int) {
+		//		//todo change the address
+		//		addr := fmt.Sprintf("127.0.0.1:%d", learner)
+		//		args.From = a.id
+		//		args.To = learner
+		//		resp := new(MsgReply)
+		//		ok := call(addr, "Learner.Learn", args, resp)
+		//		if !ok {
+		//			return
+		//		}
+		//	}(lid)
+		//}
 	} else {
 		reply.Ok = false
 	}

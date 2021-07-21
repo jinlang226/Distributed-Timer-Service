@@ -1,6 +1,8 @@
 package paxos
 
-import "fmt"
+import (
+	"modu/src/message"
+)
 
 type Proposer struct {
 	// 服务器 id
@@ -28,7 +30,7 @@ func (p *Proposer) Propose(v interface{}) interface{} {
 		}
 		reply := new(MsgReply)
 		//todo change the address
-		err := call(fmt.Sprintf("127.0.0.1:%d", aid), "Acceptor.Prepare", args, reply)
+		err := call(message.SocketNames[aid], "Acceptor.Prepare", args, reply)
 		if !err {
 			continue
 		}
@@ -58,7 +60,7 @@ func (p *Proposer) Propose(v interface{}) interface{} {
 			}
 			reply := new(MsgReply)
 			//todo change the address
-			ok := call(fmt.Sprintf("127.0.0.1:%d", aid), "Acceptor.Accept", args, reply)
+			ok := call(message.SocketNames[aid], "Acceptor.Accept", args, reply)
 			if !ok {
 				continue
 			}

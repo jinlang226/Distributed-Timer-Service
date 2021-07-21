@@ -1,10 +1,11 @@
-package main
+package timeWheel
 
 import (
 	"container/list"
 	"errors"
 	"fmt"
 	"github.com/go-playground/log"
+	"modu/src/message"
 	"sync"
 
 	"time"
@@ -61,9 +62,9 @@ var once sync.Once
 // GetTimeWheel 用来实现TimeWheel的单例模式
 func GetTimeWheel(interval time.Duration, slotNums int) *TimeWheel {
 	once.Do(func() {
-		tw = New(interval, slotNums)
+		message.TW = New(interval, slotNums)
 	})
-	return tw
+	return message.TW
 }
 
 // New 初始化一个TimeWheel对象
@@ -268,7 +269,7 @@ func (tw *TimeWheel) addTask(task *Task) {
 }
 
 func WriteToMap(key interface{}) {
-	tw.finishedTasks.Store(key, 01)
+	message.TW.finishedTasks.Store(key, 01)
 }
 
 //todo 机器宕机之后，读log恢复map
@@ -289,27 +290,27 @@ func (tw *TimeWheel) removeTask(task *Task) {
 	//write to the local cache
 	WriteToMap(task.key)
 
-	data := &writeDataByLine{
-		stopTime : time.Now().Unix(),
-		taskId   : task.key,
-		duration  :task.interval,
-		startTime: task.createdTime.Unix(),
+	data := &message.WriteDataByLine{
+		StopTime:  time.Now().Unix(),
+		TaskId:    task.key,
+		Duration:  task.interval,
+		StartTime: task.createdTime.Unix(),
 	}
 
 	//need to check
 	//write to local log
-	WriteCsvByLine(filepath+filename, data)
+	message.WriteCsvByLine(message.Filepath+message.Filename, data)
 
 	//write to other servers' log, mark as completed by paxos
-	value := proposer.Propose(data)
+	value := message.Proposer.Propose(data)
 	//send RPC calls to other severs
 	if value != data { //bugs
 		log.Error("value = %s, excepted %s", value, "hello world")
 	}
-	learnValue := learners[0].Chosen()
-	if learnValue != value {
-		log.Error("learnValue = %s, excepted %s", learnValue, "hello world")
-	}
+	//learnValue := learners[0].Chosen()
+	//if learnValue != value {
+	//	log.Error("learnValue = %s, excepted %s", learnValue, "hello world")
+	//}
 
 	defer func() {
 		<-tw.wait

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/go-playground/log"
+	"modu/src/message"
 	"net"
 	"net/rpc"
 	"time"
@@ -26,9 +27,9 @@ type RPCBackupReply struct {
 //}
 
 // This method starts a RPC server
-func (tw *TimeWheel) InitializeRPC() {
+func (tw *timeWheel.TimeWheel) InitializeRPC() {
 	rpc.Register(tw)
-	l, err := net.Listen("tcp", localName)
+	l, err := net.Listen("tcp", message.LocalName)
 	if err != nil {
 		log.Error("listen error:", err)
 	}

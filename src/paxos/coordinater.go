@@ -1,13 +1,6 @@
 package paxos
 
-var serverID1 = 1
-var serverID2 = 2
-var serverID3 = 3
-var serverID4 = 4
-var serverID5 = 5
-
-var acceptorIds = []int{serverID2, serverID3, serverID4}
-var learnerIds = []int{serverID5}
+import "modu/src/message"
 
 // 启动接受者和学习者 RPC 服务
 func start(acceptorIds []int, learnerIds []int) ([]*Acceptor, []*Learner) {
@@ -37,13 +30,13 @@ func cleanup(acceptors []*Acceptor, learners []*Learner) {
 }
 
 func StartPaxos() ([]*Acceptor, []*Learner, *Proposer) {
-	acceptors, learns := start(acceptorIds, learnerIds)
+	acceptors, learns := start(message.AcceptorIds, message.LearnerIds)
 	//defer cleanup(acceptors, learns)
 
 	// 1 是提议者 id
 	p := &Proposer{
 		id:        1,
-		acceptors: acceptorIds,
+		acceptors: message.AcceptorIds,
 	}
 
 	return acceptors, learns, p
