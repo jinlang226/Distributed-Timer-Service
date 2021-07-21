@@ -29,7 +29,7 @@ type RPCBackupReply struct {
 // This method starts a RPC server
 func InitializeRPC() {
 	rpc.Register(message.TW)
-	l, err := net.Listen("tcp", message.LocalName)
+	l, err := net.Listen("tcp", ":80")
 	if err != nil {
 		log.Error("listen error:", err)
 	}
@@ -46,7 +46,7 @@ func InitializeRPC() {
 // returns false if something goes wrong.
 //
 func call(sockname string, rpcname string, args interface{}, reply interface{}) bool {
-	c, err := rpc.Dial("tcp", sockname)
+	c, err := rpc.Dial("tcp", sockname+":80")
 	if err != nil {
 		log.Error("dialing:", err)
 	}

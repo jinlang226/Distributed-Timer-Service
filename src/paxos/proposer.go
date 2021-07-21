@@ -30,7 +30,7 @@ func (p *Proposer) Propose(v *message.WriteDataByLine) interface{} {
 		}
 		reply := new(MsgReply)
 		//todo change the address
-		err := call(message.SocketNames[aid], "Acceptor.Prepare", args, reply)
+		err := call(message.SocketNames[aid]+":80", "Acceptor.Prepare", args, reply)
 		if !err {
 			continue
 		}
@@ -60,7 +60,7 @@ func (p *Proposer) Propose(v *message.WriteDataByLine) interface{} {
 			}
 			reply := new(MsgReply)
 			//todo change the address
-			ok := call(message.SocketNames[aid], "Acceptor.Accept", args, reply)
+			ok := call(message.SocketNames[aid]+":80", "Acceptor.Accept", args, reply)
 			if !ok {
 				continue
 			}
