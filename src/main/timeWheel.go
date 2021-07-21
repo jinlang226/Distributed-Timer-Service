@@ -1,11 +1,10 @@
-package timeWheel
+package main
 
 import (
 	"container/list"
 	"errors"
 	"fmt"
 	"github.com/go-playground/log"
-	"modu/src/message"
 	"sync"
 
 	"time"
@@ -62,9 +61,9 @@ var once sync.Once
 // GetTimeWheel 用来实现TimeWheel的单例模式
 func GetTimeWheel(interval time.Duration, slotNums int) *TimeWheel {
 	once.Do(func() {
-		message.TW = New(interval, slotNums)
+		TW = New(interval, slotNums)
 	})
-	return message.TW
+	return TW
 }
 
 // New 初始化一个TimeWheel对象
@@ -269,7 +268,7 @@ func (tw *TimeWheel) addTask(task *Task) {
 }
 
 func WriteToMap(key interface{}) {
-	message.TW.finishedTasks.Store(key, 01)
+	TW.finishedTasks.Store(key, 01)
 }
 
 //todo 机器宕机之后，读log恢复map
@@ -290,7 +289,7 @@ func (tw *TimeWheel) removeTask(task *Task) {
 	//write to the local cache
 	WriteToMap(task.key)
 
-	data := &message.WriteDataByLine{
+	data := &WriteDataByLine{
 		StopTime:  time.Now().Unix(),
 		TaskId:    task.key,
 		Duration:  task.interval,
@@ -299,10 +298,10 @@ func (tw *TimeWheel) removeTask(task *Task) {
 
 	//need to check
 	//write to local log
-	message.WriteCsvByLine(message.Filepath+message.Filename, data)
+	WriteCsvByLine(Filepath+Filename, data)
 
 	//write to other servers' log, mark as completed by paxos
-	value := message.Proposer.Propose(data)
+	value := p.Propose(data)
 	//send RPC calls to other severs
 	if value != data { //bugs
 		log.Error("value = %s, excepted %s", value, "hello world")

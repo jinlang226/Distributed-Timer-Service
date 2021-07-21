@@ -1,6 +1,4 @@
-package paxos
-
-import "modu/src/message"
+package main
 
 // 启动接受者和学习者 RPC 服务
 func start(acceptorIds []int, learnerIds []int) ([]*Acceptor, []*Learner) {
@@ -30,13 +28,13 @@ func cleanup(acceptors []*Acceptor, learners []*Learner) {
 }
 
 func StartPaxos() ([]*Acceptor, []*Learner, *Proposer) {
-	acceptors, learns := start(message.AcceptorIds, message.LearnerIds)
+	acceptors, learns := start(AcceptorIds, LearnerIds)
 	//defer cleanup(acceptors, learns)
 
 	// 1 是提议者 id
 	p := &Proposer{
 		id:        1,
-		acceptors: message.AcceptorIds,
+		acceptors: AcceptorIds,
 	}
 
 	return acceptors, learns, p

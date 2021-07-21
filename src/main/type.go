@@ -1,17 +1,10 @@
-package message
+package main
 
 import (
-	"modu/src/paxos"
-	"modu/src/timeWheel"
 	"time"
 )
 
 const Format string = "2006/1/2 15:04:05"
-
-var TW *timeWheel.TimeWheel
-var Acceptors []*paxos.Acceptor
-var Learners []*paxos.Learner
-var Proposer *paxos.Proposer
 
 var Filename = "log1.csv"
 var Filepath = "/root/ft_local"

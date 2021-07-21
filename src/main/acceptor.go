@@ -1,9 +1,8 @@
-package paxos
+package main
 
 import (
 	"fmt"
 	"log"
-	"modu/src/message"
 	"net"
 	"net/rpc"
 )
@@ -17,7 +16,7 @@ type Acceptor struct {
 	// 接受者已接受的提案编号，如果为 0 表示没有接受任何提案
 	acceptedNumber int
 	// 接受者已接受的提案的值，如果没有接受任何提案则为 nil
-	acceptedValue *message.WriteDataByLine
+	acceptedValue *WriteDataByLine
 	// 学习者 id 列表
 	learners []int
 }
@@ -51,7 +50,7 @@ func (a *Acceptor) Accept(args *MsgArgs, reply *MsgReply) error {
 		reply.Ok = true
 		//todo save value
 
-		message.WriteCsvByLine(message.Filepath+message.Filename, args.Value)
+		WriteCsvByLine(Filepath+Filename, args.Value)
 		// 后台转发接受的提案给学习者
 		//for _, lid := range a.learners {
 		//	go func(learner int) {

@@ -1,8 +1,4 @@
-package paxos
-
-import (
-	"modu/src/message"
-)
+package main
 
 type Proposer struct {
 	// 服务器 id
@@ -15,7 +11,7 @@ type Proposer struct {
 	acceptors []int
 }
 
-func (p *Proposer) Propose(v *message.WriteDataByLine) interface{} {
+func (p *Proposer) Propose(v *WriteDataByLine) interface{} {
 	p.round++
 	p.number = p.proposalNumber()
 
@@ -30,7 +26,7 @@ func (p *Proposer) Propose(v *message.WriteDataByLine) interface{} {
 		}
 		reply := new(MsgReply)
 		//todo change the address
-		err := call(message.SocketNames[aid]+":80", "Acceptor.Prepare", args, reply)
+		err := call(SocketNames[aid]+":80", "Acceptor.Prepare", args, reply)
 		if !err {
 			continue
 		}
@@ -60,7 +56,7 @@ func (p *Proposer) Propose(v *message.WriteDataByLine) interface{} {
 			}
 			reply := new(MsgReply)
 			//todo change the address
-			ok := call(message.SocketNames[aid]+":80", "Acceptor.Accept", args, reply)
+			ok := call(SocketNames[aid]+":80", "Acceptor.Accept", args, reply)
 			if !ok {
 				continue
 			}
