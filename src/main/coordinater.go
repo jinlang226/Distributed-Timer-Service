@@ -9,10 +9,10 @@ func start(acceptorIds []int, learnerIds []int) ([]*Acceptor, []*Learner) {
 	}
 
 	learners := make([]*Learner, 0)
-	for _, lid := range learnerIds {
-		l := newLearner(lid, acceptorIds)
-		learners = append(learners, l)
-	}
+	//for _, lid := range learnerIds {
+	//	l := newLearner(lid, acceptorIds)
+	//	learners = append(learners, l)
+	//}
 
 	return acceptors, learners
 }

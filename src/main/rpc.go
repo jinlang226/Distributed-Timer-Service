@@ -8,33 +8,49 @@ import (
 	"time"
 )
 
-type RPCBackupArgs struct {
+type AddTaskArgs struct {
+	interval time.Duration
+	uuid     int
+	execTime time.Time
+	taskJob  interface{}
+}
+
+type AddTaskReply struct {
+}
+
+type BackupArgs struct {
 	Interval time.Duration
 	Uuid     int
 }
 
-type RPCBackupReply struct {
+type BackupReply struct {
 	Msg  string
 	Code int
 }
 
-//from MIT 6.824
-//func serverSocket() string {
-//	s := "/var/tmp/824-mr-"
-//	s += strconv.Itoa(os.Getuid())
-//	return s
-//}
+type PaxosMsgArgs struct {
+	Number int              // 提案编号
+	Value  *WriteDataByLine // 提案的值
+	From   int              // 发送者 id
+	To     int              // 接收者 id
+}
+
+type PaxosMsgReply struct {
+	Ok     bool
+	Number int
+	Value  *WriteDataByLine
+}
 
 // This method starts a RPC server
 func InitializeRPC() {
 	rpc.Register(TW)
 	l, err := net.Listen("tcp", ":80")
 	if err != nil {
-		log.Error("listen error:", err)
+		log.Error("listen error 1:", err)
 	}
 	conn, err := l.Accept()
 	if err != nil {
-		log.Error("listen error:", err)
+		log.Error("listen error 2:", err)
 	}
 	rpc.ServeConn(conn)
 }
@@ -44,7 +60,7 @@ func InitializeRPC() {
 // usually returns true.
 // returns false if something goes wrong.
 //
-func callRPC(sockname string, rpcname string, args interface{}, reply interface{}) bool {
+func call(sockname string, rpcname string, args interface{}, reply interface{}) bool {
 	c, err := rpc.Dial("tcp", sockname+":80")
 	if err != nil {
 		log.Error("dialing:", err)

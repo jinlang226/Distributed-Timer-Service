@@ -9,7 +9,6 @@ var TW *TimeWheel
 var p Proposer
 
 func main() {
-
 	TW = startServer()
 	_, _, p := StartPaxos()
 	p.id = 1

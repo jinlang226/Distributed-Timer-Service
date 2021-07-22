@@ -19,12 +19,12 @@ func (p *Proposer) Propose(v *WriteDataByLine) interface{} {
 	prepareCount := 0
 	maxNumber := 0
 	for _, aid := range p.acceptors {
-		args := MsgArgs{
+		args := PaxosMsgArgs{
 			Number: p.number,
 			From:   p.id,
 			To:     aid,
 		}
-		reply := new(MsgReply)
+		reply := new(PaxosMsgReply)
 		//todo change the address
 		err := call(SocketNames[aid]+":80", "Acceptor.Prepare", args, reply)
 		if !err {
@@ -48,13 +48,13 @@ func (p *Proposer) Propose(v *WriteDataByLine) interface{} {
 	acceptCount := 0
 	if prepareCount >= p.majority() {
 		for _, aid := range p.acceptors {
-			args := MsgArgs{
+			args := PaxosMsgArgs{
 				Number: p.number,
 				Value: v,
 				From: p.id,
 				To: aid,
 			}
-			reply := new(MsgReply)
+			reply := new(PaxosMsgReply)
 			//todo change the address
 			ok := call(SocketNames[aid]+":80", "Acceptor.Accept", args, reply)
 			if !ok {

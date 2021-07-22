@@ -5,21 +5,11 @@ import (
 	"time"
 )
 
-type AddTaskArgs struct {
-	interval time.Duration
-	uuid     int
-	execTime time.Time
-	taskJob  interface{}
-}
-
-type AddTaskReply struct {
-}
-
 // receive tasks from Client, parameter from client might be string, need parsing interval and uuid from it.
 func Register(interval time.Duration, uuid int) {
 	register(interval, uuid)
 	//rpc to other servers
-	args := RPCBackupArgs{
+	args := BackupArgs{
 		Interval: interval,
 		Uuid:     uuid,
 	}
@@ -44,7 +34,7 @@ func BatchRegister() {
 
 // rpc calling, public method
 // finish tasks from other server
-func Backup(args *RPCBackupArgs, reply *RPCBackupReply) error {
+func Backup(args *BackupArgs, reply *BackupReply) error {
 	uuid := args.Uuid
 	interval := args.Interval
 	register(interval, uuid)
@@ -64,12 +54,12 @@ func register(interval time.Duration, uuid int) {
 	}
 }
 
-func backup(args RPCBackupArgs) {
-	reply := RPCBackupReply{}
+func backup(args BackupArgs) {
+	reply := BackupReply{}
 	// call method is defined in
 	for _, socketName := range SocketNames {
 		if socketName != LocalName {
-			if ok := callRPC(socketName, "Backup", args, &reply); !ok {
+			if ok := call(socketName, "Backup", args, &reply); !ok {
 				fmt.Printf("Register: backup register error\n")
 			}
 		}

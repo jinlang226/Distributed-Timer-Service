@@ -5,9 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
-
 	"github.com/go-playground/log"
-
 	"time"
 )
 
@@ -133,6 +131,7 @@ func (tw *TimeWheel) AddTask(args AddTaskArgs, reply AddTaskReply) error {
 	interval := args.interval
 	key := args.taskJob
 	createdTime := args.execTime
+	uuid := args.uuid
 	if interval <= 0 || key == nil {
 		return errors.New("Invalid task params")
 	}
@@ -145,7 +144,7 @@ func (tw *TimeWheel) AddTask(args AddTaskArgs, reply AddTaskReply) error {
 
 	tw.wait <- 1
 	tw.addTaskChannel <- &Task{
-		key:         key,
+		key:         uuid,
 		interval:    interval,
 		createdTime: createdTime,
 		//job:         job,

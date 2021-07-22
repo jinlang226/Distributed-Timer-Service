@@ -30,7 +30,7 @@ func newAcceptor(id int, learners []int) *Acceptor {
 	return acceptor
 }
 
-func (a *Acceptor) Prepare(args *MsgArgs, reply *MsgReply) error {
+func (a *Acceptor) Prepare(args *PaxosMsgArgs, reply *PaxosMsgReply) error {
 	if args.Number > a.promiseNumber {
 		a.promiseNumber = args.Number
 		reply.Number = a.acceptedNumber
@@ -42,7 +42,7 @@ func (a *Acceptor) Prepare(args *MsgArgs, reply *MsgReply) error {
 	return nil
 }
 
-func (a *Acceptor) Accept(args *MsgArgs, reply *MsgReply) error {
+func (a *Acceptor) Accept(args *PaxosMsgArgs, reply *PaxosMsgReply) error {
 	if args.Number >= a.promiseNumber {
 		a.promiseNumber = args.Number
 		a.acceptedNumber = args.Number
@@ -58,7 +58,7 @@ func (a *Acceptor) Accept(args *MsgArgs, reply *MsgReply) error {
 		//		addr := fmt.Sprintf("127.0.0.1:%d", learner)
 		//		args.From = a.id
 		//		args.To = learner
-		//		resp := new(MsgReply)
+		//		resp := new(PaxosMsgReply)
 		//		ok := call(addr, "Learner.Learn", args, resp)
 		//		if !ok {
 		//			return
@@ -77,7 +77,7 @@ func (a *Acceptor) server() {
 	addr := fmt.Sprintf(":%d", a.id)
 	l, e := net.Listen("tcp", addr)
 	if e != nil {
-		log.Fatal("listen error:", e)
+		log.Fatal("listen error 3:", e)
 	}
 	a.lis = l
 	go func() {

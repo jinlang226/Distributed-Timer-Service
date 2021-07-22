@@ -12,16 +12,16 @@ type Learner struct {
 	// 学习者 id
 	id        int
 	// 记录接受者已接受的提案：[接受者 id]请求消息
-	acceptedMsg map[int]MsgArgs
+	acceptedMsg map[int]PaxosMsgArgs
 }
 
 func newLearner(id int, acceptorIds []int) *Learner {
 	learner := &Learner{
 		id: id,
-		acceptedMsg: make(map[int]MsgArgs),
+		acceptedMsg: make(map[int]PaxosMsgArgs),
 	}
 	for _, aid := range acceptorIds {
-		learner.acceptedMsg[aid] = MsgArgs{
+		learner.acceptedMsg[aid] = PaxosMsgArgs{
 			Number: 0,
 			Value:  nil,
 		}
@@ -30,7 +30,7 @@ func newLearner(id int, acceptorIds []int) *Learner {
 	return learner
 }
 
-func (l *Learner) Learn(args *MsgArgs, reply *MsgReply) error {
+func (l *Learner) Learn(args *PaxosMsgArgs, reply *PaxosMsgReply) error {
 	a := l.acceptedMsg[args.From]
 	if a.Number < args.Number {
 		l.acceptedMsg[args.From] = *args
@@ -42,25 +42,25 @@ func (l *Learner) Learn(args *MsgArgs, reply *MsgReply) error {
 	return nil
 }
 
-func (l *Learner) Chosen() interface{} {
-	acceptCounts := make(map[int]int)
-	acceptMsg := make(map[int]MsgArgs)
-
-	for _, accepted := range l.acceptedMsg {
-		if accepted.Number != 0 {
-			acceptCounts[accepted.Number]++
-			acceptMsg[accepted.Number] = accepted
-		}
-	}
-
-	for n, count := range acceptCounts {
-		if count >= l.majority() {
-			//todo save value in logs and local map
-			return acceptMsg[n].Value
-		}
-	}
-	return nil
-}
+//func (l *Learner) Chosen() interface{} {
+//	acceptCounts := make(map[int]int)
+//	acceptMsg := make(map[int]PaxosMsgArgs)
+//
+//	for _, accepted := range l.acceptedMsg {
+//		if accepted.Number != 0 {
+//			acceptCounts[accepted.Number]++
+//			acceptMsg[accepted.Number] = accepted
+//		}
+//	}
+//
+//	for n, count := range acceptCounts {
+//		if count >= l.majority() {
+//			//todo save value in logs and local map
+//			return acceptMsg[n].Value
+//		}
+//	}
+//	return nil
+//}
 
 func (l *Learner) majority() int {
 	return len(l.acceptedMsg)/2 + 1
@@ -72,7 +72,7 @@ func (l *Learner) server(id int) {
 	addr := fmt.Sprintf(":%d", id)
 	lis, e := net.Listen("tcp", addr)
 	if e != nil {
-		log.Fatal("listen error:", e)
+		log.Fatal("listen error 4:", e)
 	}
 	l.lis = lis
 	go func() {
