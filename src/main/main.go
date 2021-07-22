@@ -5,16 +5,15 @@ import (
 	"time"
 )
 
-
 var p Proposer
 
 func main() {
 	timeWheel := CreateTimeWheel(1*time.Second, 60)
 	timeWheel.startTW()
-	_, _, p := StartPaxos()
+	//_, _, p := StartPaxos()
 	p.id = 1
 	fmt.Println("initialize rpc")
-	timeWheel.serverTW()
+	//timeWheel.serverTW()
 	fmt.Println("start Batch register")
 	//BatchRegister()
 
