@@ -8,16 +8,14 @@ import (
 )
 
 type Learner struct {
-	lis net.Listener
-	// 学习者 id
-	id        int
-	// 记录接受者已接受的提案：[接受者 id]请求消息
-	acceptedMsg map[int]PaxosMsgArgs
+	lis         net.Listener
+	id          int                  // 学习者 id
+	acceptedMsg map[int]PaxosMsgArgs // 记录接受者已接受的提案：[接受者 id]请求消息
 }
 
 func newLearner(id int, acceptorIds []int) *Learner {
 	learner := &Learner{
-		id: id,
+		id:          id,
 		acceptedMsg: make(map[int]PaxosMsgArgs),
 	}
 	for _, aid := range acceptorIds {

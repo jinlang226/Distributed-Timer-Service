@@ -4,10 +4,13 @@ import (
 	"container/list"
 	"errors"
 	"fmt"
-	"sync"
 	"github.com/go-playground/log"
+	"net"
+	"sync"
 	"time"
 )
+
+var TW *TimeWheel
 
 // TimeWheel的核心结构体
 type TimeWheel struct {
@@ -31,7 +34,8 @@ type TimeWheel struct {
 	wait          chan int
 	isRunning     bool
 	finishedTasks *sync.Map //update according to the logs by RPC
-	sync.Mutex
+	mutex         *sync.Mutex
+	lis           net.Listener
 }
 
 // 需要执行的Job的函数结构体
@@ -57,8 +61,8 @@ type Task struct {
 
 var once sync.Once
 
-// GetTimeWheel 用来实现TimeWheel的单例模式
-func GetTimeWheel(interval time.Duration, slotNums int) *TimeWheel {
+// CreateTimeWheel 用来实现TimeWheel的单例模式
+func CreateTimeWheel(interval time.Duration, slotNums int) *TimeWheel {
 	once.Do(func() {
 		TW = New(interval, slotNums)
 	})
@@ -80,8 +84,8 @@ func New(interval time.Duration, slotNums int) *TimeWheel {
 		stopChannel:       make(chan bool),
 		taskRecords:       &sync.Map{},
 		//job:               job,
-		wait:      make(chan int, 1),
-		isRunning: false,
+		wait:              make(chan int, 1),
+		isRunning:         false,
 	}
 
 	tw.initSlots()
@@ -89,55 +93,56 @@ func New(interval time.Duration, slotNums int) *TimeWheel {
 }
 
 // Start 启动时间轮盘
-func (tw *TimeWheel) Start() {
+func (tw *TimeWheel) startTW() {
 	tw.ticker = time.NewTicker(tw.interval)
 	go tw.start()
 	tw.isRunning = true
 }
 
 // Stop 关闭时间轮盘
-func (tw *TimeWheel) Stop() {
-	tw.stopChannel <- true
-	tw.isRunning = false
-}
+//func (tw *TimeWheel) Stop() {
+//	tw.stopChannel <- true
+//	tw.isRunning = false
+//}
 
 // IsRunning 检查一下时间轮盘的是否在正常运行
-func (tw *TimeWheel) IsRunning() bool {
-	return tw.isRunning
-}
+//func (tw *TimeWheel) IsRunning() bool {
+//	return tw.isRunning
+//}
 
-type foo struct {
-	bar bool
-}
-
-func (tw *TimeWheel) Finished(args interface{}, reply foo) error {
-	tw.taskRecords.Range(func(k, v interface{}) bool {
-		if k == nil && v == nil {
-			reply.bar = true
-			return true
-		}
-		reply.bar = false
-		return false
-	})
-	return nil
-}
+//type foo struct {
+//	bar bool
+//}
+//
+//func (tw *TimeWheel) Finished(args interface{}, reply foo) error {
+//	tw.taskRecords.Range(func(k, v interface{}) bool {
+//		if k == nil && v == nil {
+//			reply.bar = true
+//			return true
+//		}
+//		reply.bar = false
+//		return false
+//	})
+//	return nil
+//}
 
 // AddTask 向时间轮盘添加任务的开放函数
 // @param interval    任务的周期
 // @param key         任务的key，必须是唯一的，否则添加任务的时候会失败
 // @param createTime  任务的创建时间
 // func (tw *TimeWheel) AddTask(interval time.Duration, key interface{}, createdTime time.Time, job Job) error {
-func (tw *TimeWheel) AddTask(args AddTaskArgs, reply AddTaskReply) error {
+func (tw *TimeWheel) AddTask(args *AddTaskArgs, reply *AddTaskReply) error {
 	interval := args.interval
 	key := args.taskJob
 	createdTime := args.execTime
 	uuid := args.uuid
+	//reply.stupid=250
 	if interval <= 0 || key == nil {
 		return errors.New("Invalid task params")
 	}
 
 	// 检查Task.Key是否已经存在
-	_, exist := tw.taskRecords.Load(key)
+	_, exist := tw.taskRecords.Load(uuid)
 	if exist {
 		return errors.New("Duplicate task key")
 	}
@@ -150,11 +155,12 @@ func (tw *TimeWheel) AddTask(args AddTaskArgs, reply AddTaskReply) error {
 		//job:         job,
 		//times:       times,
 	}
+	fmt.Println("successfully add tasks")
 	return nil
 }
 
 // RemoveTask 从时间轮盘删除任务的公共函数
-func (tw *TimeWheel) RemoveTask(key interface{}) error {
+func (tw *TimeWheel) publicRemoveTask(key interface{}) error {
 	if key == nil {
 		return nil
 	}
@@ -183,15 +189,19 @@ func (tw *TimeWheel) start() {
 	for {
 		select {
 		case <-tw.ticker.C:
+			log.Info("case 1 ===== ")
 			tw.checkAndRunTask()
 		case task := <-tw.addTaskChannel:
 			// 此处利用Task.createTime来定位任务在时间轮盘的位置和执行圈数
 			// 如果直接用任务的周期来定位位置，那么在服务重启的时候，任务周器相同的点会被定位到相同的卡槽，
 			// 会造成任务过度集中
+			log.Info("case 2 ===== ")
 			tw.addTask(task)
 		case task := <-tw.removeTaskChannel:
+			log.Info("case 3 ===== ")
 			tw.removeTask(task)
 		case <-tw.stopChannel:
+			log.Info("case 4 ===== ")
 			tw.ticker.Stop()
 			return
 		}
@@ -200,6 +210,7 @@ func (tw *TimeWheel) start() {
 
 // 检查该轮盘点位上的Task，看哪个需要执行
 func (tw *TimeWheel) checkAndRunTask() {
+	fmt.Println("checkAndRunTask")
 	// 获取该轮盘位置的双向链表
 	currentList := tw.slots[tw.currentPos]
 
@@ -246,7 +257,8 @@ func (tw *TimeWheel) checkAndRunTask() {
 			//}
 
 			//delete task
-			err := tw.RemoveTask(task.key)
+			fmt.Println("call removeTask")
+			err := tw.publicRemoveTask(task.key)
 			if err != nil {
 				panic(err)
 			}
@@ -288,6 +300,7 @@ func traverseMap() {
 
 // 删除任务的内部函数
 func (tw *TimeWheel) removeTask(task *Task) {
+	fmt.Println("removeTask ing")
 	// 从map结构中删除
 	val, _ := tw.taskRecords.Load(task.key)
 	tw.taskRecords.Delete(task.key)
@@ -308,8 +321,9 @@ func (tw *TimeWheel) removeTask(task *Task) {
 
 	//need to check
 	//write to local log
-	WriteCsvByLine(Filepath+Filename, data)
-
+	fmt.Println("writeCsvByLine")
+	//writeCsvByLine(Filepath+Filename, data)
+	writeCsvByLine("/Users/wjl/Desktop/Distributed-Timer-Service/src/test", data) //only for testing
 	//write to other servers' log, mark as completed by paxos
 	value := p.Propose(data)
 	//send RPC calls to other severs

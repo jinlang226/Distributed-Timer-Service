@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-playground/log"
+	"strconv"
 	"time"
 )
 
@@ -18,17 +20,29 @@ func Register(interval time.Duration, uuid int) {
 
 // scan the csv
 func BatchRegister() {
-	result, err := ReadFile("/root/ft_local/Distributed-Timer-Service/src/test/test.csv")
+	//result, err := ReadFile("/root/ft_local/Distributed-Timer-Service/src/test/test.csv")
+	//only for testing
+	result, err := ReadFile("/Users/wjl/Desktop/Distributed-Timer-Service/src/test/data.csv")
 	if err != nil {
 		fmt.Println("err in read file")
 	}
 	//for each line in csv data structure:
-	for _, tasks := range result {
-		for _, items := range tasks {
-			duration := time.Duration(items[1]) * time.Second
-			uuid := int(items[0])
-			Register(duration, uuid)
+	for _, items := range result {
+		//fmt.Println(tasks)
+		//for _, items := range tasks {
+		fmt.Println(items)
+		d, err := strconv.Atoi(items[1])
+		if err != nil {
+			log.Error(err)
 		}
+		duration := time.Duration(d) * time.Second
+		uuid, err := strconv.Atoi(items[0])
+		if err != nil {
+			log.Error(err)
+		}
+		fmt.Println("duration: ", duration, " uuid: ", uuid)
+		Register(duration, uuid)
+		//}
 	}
 }
 
@@ -46,9 +60,10 @@ func Backup(args *BackupArgs, reply *BackupReply) error {
 // register tasks
 func register(interval time.Duration, uuid int) {
 	fmt.Println(fmt.Sprintf("%s Add Task ID: %d", time.Now().Format(Format), uuid))
-	args := AddTaskArgs{interval, uuid, time.Now(), TaskJob}
+	args := &AddTaskArgs{interval, uuid, time.Now(), TaskJob}
 	reply := AddTaskReply{}
-	err := TW.AddTask(args, reply)
+	err := TW.AddTask(args, &reply)
+	//fmt.Println(reply.stupid)
 	if err != nil {
 		panic(err)
 	}
@@ -57,12 +72,17 @@ func register(interval time.Duration, uuid int) {
 func backup(args BackupArgs) {
 	reply := BackupReply{}
 	// call method is defined in
-	for _, socketName := range SocketNames {
-		if socketName != LocalName {
-			if ok := call(socketName, "Backup", args, &reply); !ok {
-				fmt.Printf("Register: backup register error\n")
-			}
-		}
+	//for _, socketName := range SocketNames {
+	//	if socketName != LocalName {
+	//		if ok := call(socketName, "Backup", args, &reply); !ok {
+	//			fmt.Printf("Register: backup register error\n")
+	//		}
+	//	}
+	//}
+	if ok := call(Socketname2, "Backup", args, &reply); !ok {
+		fmt.Printf("Register: backup register error\n")
 	}
-
+	if ok := call(Socketname3, "Backup", args, &reply); !ok {
+		fmt.Printf("Register: backup register error\n")
+	}
 }

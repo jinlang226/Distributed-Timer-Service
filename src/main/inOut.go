@@ -91,7 +91,7 @@ func ReadFile(filename string) ([][]string, error) {
 //		writeDataLine := []string{taskId, duration, strconv.FormatInt(startTime, 10), strconv.FormatInt(stopTime, 10)}
 //		log.Info("write data by line: ", writeDataLine)
 //		// 写入一行数据
-//		if err := WriteCsvByLine(path, writeDataLine); err != nil {
+//		if err := writeCsvByLine(path, writeDataLine); err != nil {
 //			log.Error(err)
 //		}
 //	}
@@ -99,10 +99,10 @@ func ReadFile(filename string) ([][]string, error) {
 //}
 
 //  写入一行数据
-func WriteCsvByLine(path string, dataStruct *WriteDataByLine) error {
+func writeCsvByLine(path string, dataStruct *WriteDataByLine) error {
 	//todo: bugs might remain, need mutex
-	TW.Lock()
-	defer TW.Unlock()
+	TW.mutex.Lock()
+	defer TW.mutex.Unlock()
 
 	//OpenFile 读取文件，不存在时则创建，使用追加模式
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)

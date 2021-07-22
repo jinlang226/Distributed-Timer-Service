@@ -16,6 +16,7 @@ type AddTaskArgs struct {
 }
 
 type AddTaskReply struct {
+	stupid int
 }
 
 type BackupArgs struct {
@@ -41,18 +42,24 @@ type PaxosMsgReply struct {
 	Value  *WriteDataByLine
 }
 
-// This method starts a RPC server
-func InitializeRPC() {
-	rpc.Register(TW)
-	l, err := net.Listen("tcp", ":80")
+// This method starts a RPC server for tw
+func (tw *TimeWheel) serverTW() {
+	rpcs := rpc.NewServer()
+	rpcs.Register(tw)
+	lis, err := net.Listen("tcp", ":80")
 	if err != nil {
 		log.Error("listen error 1:", err)
 	}
-	conn, err := l.Accept()
-	if err != nil {
-		log.Error("listen error 2:", err)
-	}
-	rpc.ServeConn(conn)
+	tw.lis = lis
+	go func() {
+		for {
+			conn, err := tw.lis.Accept()
+			if err != nil {
+				continue
+			}
+			go rpcs.ServeConn(conn)
+		}
+	}()
 }
 
 //

@@ -5,23 +5,43 @@ import (
 	"time"
 )
 
-var TW *TimeWheel
+
 var p Proposer
 
 func main() {
-	TW = startServer()
+	timeWheel := CreateTimeWheel(1*time.Second, 60)
+	timeWheel.startTW()
 	_, _, p := StartPaxos()
 	p.id = 1
-	InitializeRPC()
-	BatchRegister()
-}
+	fmt.Println("initialize rpc")
+	timeWheel.serverTW()
+	fmt.Println("start Batch register")
+	//BatchRegister()
 
-func startServer() *TimeWheel {
-	//初始化一个时间间隔是1s，一共有60个齿轮的时间轮盘，默认轮盘转动一圈的时间是60s
-	tw := GetTimeWheel(1*time.Second, 60)
-	tw.Start() // start tw
-	fmt.Println("start doing tasks")
-	return tw
+	fmt.Println(fmt.Sprintf("%v Add task task-5s", time.Now().Format(time.RFC3339)))
+	args := &AddTaskArgs{time.Duration(5) * time.Second, 100, time.Now(), TaskJob}
+	reply := AddTaskReply{}
+	err := timeWheel.AddTask(args, &reply)
+	fmt.Println("finish")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(fmt.Sprintf("%v Add task task-10s", time.Now().Format(time.RFC3339)))
+	args = &AddTaskArgs{time.Duration(10) * time.Second, 200, time.Now(), TaskJob}
+	reply = AddTaskReply{}
+	err = timeWheel.AddTask(args, &reply)
+	fmt.Println("finish")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(fmt.Sprintf("%v Add task task-20s", time.Now().Format(time.RFC3339)))
+	args = &AddTaskArgs{time.Duration(20) * time.Second, 300, time.Now(), TaskJob}
+	reply = AddTaskReply{}
+	err = timeWheel.AddTask(args, &reply)
+	fmt.Println("finish")
+	if err != nil {
+		panic(err)
+	}
 }
 
 func TaskJob(key interface{}) {
