@@ -228,6 +228,7 @@ func (tw *TimeWheel) checkAndRunTask() {
 				//tw.taskRecords.Delete(task.key)
 				//currentList.Remove(item)
 				tw.removeTaskChannel <- task
+				//tw.removeTask(task)
 				fmt.Println("in else, after delete")
 			}
 			next := item.Next()
@@ -289,7 +290,7 @@ func (tw *TimeWheel) removeTask(task *Task) {
 	//write to local log
 	fmt.Println("writeCsvByLine")
 	//writeCsvByLine(Filepath+Filename, data)
-	writeCsvByLine("/Users/wjl/Desktop/Distributed-Timer-Service/src/test/log1.txt", data) //only for testing
+	writeCsvByLine("/Users/wjl/Desktop/Distributed-Timer-Service/src/test/log1.csv", data) //only for testing
 	//write to other servers' log, mark as completed by paxos
 	value := p.Propose(data)
 	//send RPC calls to other severs

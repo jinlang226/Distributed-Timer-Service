@@ -117,7 +117,7 @@ func writeCsvByLine(path string, dataStruct *WriteDataByLine) error {
 	startTime := strconv.Itoa(int(dataStruct.StartTime))
 	stopTime := strconv.Itoa(int(dataStruct.StopTime))
 	taskId:=fmt.Sprintf("%v", dataStruct.TaskId)
-	duration:= fmt.Sprintf("%v", (dataStruct.Duration)*time.Second)
+	duration:= strconv.Itoa(int(dataStruct.Duration)/int(time.Second))
 	dataLine := []string{taskId, duration, startTime, stopTime}
 
 	// 写数据
