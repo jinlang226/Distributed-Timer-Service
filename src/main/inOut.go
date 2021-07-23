@@ -43,61 +43,6 @@ func ReadFile(filename string) ([][]string, error) {
 	return stringValue, nil
 }
 
-// readFiles 读文件夹
-//func readFiles() error {
-//	// 路径
-//	wholePathName := "./testdata/read_data"
-//	// 读文件夹
-//	rd, err := ioutil.ReadDir(wholePathName)
-//	if err != nil {
-//		return err
-//	}
-//	var results [][][]string
-//	// 遍历文件夹内文件，数据存入results
-//	for _, fi := range rd {
-//		result, err := readFile(wholePathName + "/" + fi.Name())
-//		if err != nil {
-//			return err
-//		}
-//		if result != nil {
-//			results = append(results, result)
-//		}
-//	}
-//	// 数据存入data内
-//	data = make(map[string]string)
-//	for _, tasks := range results {
-//		for _, items := range tasks {
-//			data[items[taskName]] = items[duration]
-//		}
-//	}
-//	return nil
-//}
-
-// writeCsv 写入csv文件
-//func writeCsv(path string, data map[string]string) error {
-//	for taskId, duration := range data {
-//		// 记录开始睡眠的时间点
-//		startTime := time.Now().Unix()
-//		// 睡眠duration
-//		sleepDuration, err := strconv.Atoi(duration)
-//		if err != nil {
-//			log.Error(err)
-//		}
-//		// 睡眠
-//		time.Sleep(time.Duration(sleepDuration) * time.Second)
-//		// 记录睡眠结束时间点
-//		stopTime := time.Now().Unix()
-//		// 写入的csv行数据：对应map中的一个KV
-//		writeDataLine := []string{taskId, duration, strconv.FormatInt(startTime, 10), strconv.FormatInt(stopTime, 10)}
-//		log.Info("write data by line: ", writeDataLine)
-//		// 写入一行数据
-//		if err := writeCsvByLine(path, writeDataLine); err != nil {
-//			log.Error(err)
-//		}
-//	}
-//	return nil
-//}
-
 //  写入一行数据
 func writeCsvByLine(path string, dataStruct *WriteDataByLine) error {
 	//todo: bugs might remain, need mutex

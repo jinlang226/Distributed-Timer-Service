@@ -28,7 +28,7 @@ func test(timeWheel *TimeWheel) {
 	args := &AddTaskArgs{time.Duration(1) * time.Second, 1, time.Now(), TaskJob}
 	reply := AddTaskReply{}
 	err := timeWheel.AddTask(args, &reply)
-	fmt.Println("finish")
+	fmt.Println("finish1")
 	if err != nil {
 		panic(err)
 	}
@@ -36,7 +36,7 @@ func test(timeWheel *TimeWheel) {
 	args = &AddTaskArgs{time.Duration(10) * time.Second, 2, time.Now(), TaskJob}
 	reply = AddTaskReply{}
 	err = timeWheel.AddTask(args, &reply)
-	fmt.Println("finish")
+	fmt.Println("finish2")
 	if err != nil {
 		panic(err)
 	}

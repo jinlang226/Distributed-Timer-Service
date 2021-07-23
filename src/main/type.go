@@ -7,9 +7,10 @@ import (
 const Format string = "2006/1/2 15:04:05"
 
 //var Filename = "log1.csv"
-//var Filepath = "/root/ft_local"
-var Filepath = "/Users/wjl/Desktop/Distributed-Timer-Service/src/test/log1.csv"
-var Filename =""
+var FilenameRead = "data.csv"
+//var Filepath = "/root/ft_local/Distributed-Timer-Service/src/test"
+var Filepath = "/Users/wjl/Desktop/Distributed-Timer-Service/src/test/"
+var Filename ="log1.csv"
 
 const (
 	serverID1 = 1
