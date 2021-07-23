@@ -74,6 +74,9 @@ func call(sockname string, rpcname string, args interface{}, reply interface{}) 
 	}
 	defer c.Close()
 
+	fmt.Println(rpcname)
+	fmt.Println(args)
+	fmt.Println(reply)
 	err = c.Call(rpcname, args, reply)
 	if err == nil {
 		return true

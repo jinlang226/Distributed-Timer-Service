@@ -5,20 +5,27 @@ import (
 	"time"
 )
 
-var p Proposer
+var a, l, p  = StartPaxos()
 
 func main() {
 	timeWheel := CreateTimeWheel(1*time.Second, 60)
 	timeWheel.startTW()
-	//_, _, p := StartPaxos()
-	p.id = 1
 	fmt.Println("initialize rpc")
-	//timeWheel.serverTW()
+	timeWheel.serverTW()
 	fmt.Println("start Batch register")
-	//BatchRegister()
+	BatchRegister()
 
+	//test(timeWheel)
+	defer func() { for {} }()
+}
+
+func TaskJob(key interface{}) {
+	fmt.Println(fmt.Sprintf("%v This is a task job with key: %v", time.Now().Format(Format), key))
+}
+
+func test(timeWheel *TimeWheel) {
 	fmt.Println(fmt.Sprintf("%v Add task task-5s", time.Now().Format(time.RFC3339)))
-	args := &AddTaskArgs{time.Duration(5) * time.Second, 1, time.Now(), TaskJob}
+	args := &AddTaskArgs{time.Duration(1) * time.Second, 1, time.Now(), TaskJob}
 	reply := AddTaskReply{}
 	err := timeWheel.AddTask(args, &reply)
 	fmt.Println("finish")
@@ -33,16 +40,4 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-
-	//fmt.Println("Remove task task-5s")
-	//err = timeWheel.publicRemoveTask(100)
-	//if err != nil {
-	//	panic(err)
-	//}
-	defer func() { for {} }()
-}
-
-func TaskJob(key interface{}) {
-	fmt.Println(fmt.Sprintf("%v This is a task job with key: %v", time.Now().Format(Format), key))
 }

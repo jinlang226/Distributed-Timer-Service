@@ -28,9 +28,7 @@ func BatchRegister() {
 	}
 	//for each line in csv data structure:
 	for _, items := range result {
-		//fmt.Println(tasks)
-		//for _, items := range tasks {
-		fmt.Println(items)
+		//fmt.Println(items)
 		d, err := strconv.Atoi(items[1])
 		if err != nil {
 			log.Error(err)

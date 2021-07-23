@@ -33,7 +33,7 @@ type TimeWheel struct {
 	//job       Job
 	isRunning     bool
 	finishedTasks *sync.Map //update according to the logs by RPC
-	mutex         *sync.Mutex
+	mutex         sync.Mutex
 	lis           net.Listener
 }
 
@@ -135,7 +135,6 @@ func (tw *TimeWheel) AddTask(args *AddTaskArgs, reply *AddTaskReply) error {
 	key := args.taskJob
 	createdTime := args.execTime
 	uuid := args.uuid
-	//reply.stupid=250
 	if interval <= 0 || key == nil {
 		return errors.New("Invalid task params")
 	}
@@ -169,28 +168,27 @@ func (tw *TimeWheel) start() {
 	for {
 		select {
 		case <-tw.ticker.C:
-			fmt.Println("case 1 ===== ")
+			fmt.Println("=========== case 1: ticker ===========")
 			tw.checkAndRunTask()
 		case task := <-tw.addTaskChannel:
 			// 此处利用Task.createTime来定位任务在时间轮盘的位置和执行圈数
 			// 如果直接用任务的周期来定位位置，那么在服务重启的时候，任务周器相同的点会被定位到相同的卡槽，
 			// 会造成任务过度集中
-			fmt.Println("case 2 ===== ")
+			fmt.Println("=========== case 2: addTask ===========")
 			tw.addTask(task)
-		case task := <-tw.removeTaskChannel:
-			fmt.Println("case 3 ===== ")
-			tw.removeTask(task)
-		case <-tw.stopChannel:
-			fmt.Println("case 4 ===== ")
-			tw.ticker.Stop()
-			return
+		//case task := <-tw.removeTaskChannel:
+		//	fmt.Println("case 3 ===== ")
+		//	tw.removeTask(task)
+		//case <-tw.stopChannel:
+		//	fmt.Println("case 4 ===== ")
+		//	tw.ticker.Stop()
+		//	return
 		}
 	}
 }
 
 // 检查该轮盘点位上的Task，看哪个需要执行
 func (tw *TimeWheel) checkAndRunTask() {
-	fmt.Println("checkAndRunTask")
 	// 获取该轮盘位置的双向链表
 	currentList := tw.slots[tw.currentPos]
 
@@ -207,32 +205,18 @@ func (tw *TimeWheel) checkAndRunTask() {
 				item = item.Next()
 				continue
 			}
-			// 执行任务时，Task.job是第一优先级，然后是TimeWheel.job
-			if task.job != nil {
-				go task.job(task.key)
-				//} else if tw.job != nil {
-				//	go tw.job(task.key)
-			} else {
-				fmt.Println(fmt.Sprintf("The task %d don't have job to run", task.key))
-			}
 
-			//delete task
-			fmt.Println("call removeTask")
-
+			next := item.Next()
+			item = next
 			// 检查该Task是否存在
 			_, ok := tw.taskRecords.Load(task.key)
 			if !ok {
 				log.Info(fmt.Sprintf("Task key %d doesn't existed in task list, please check your input", task.key))
-			}else {
-				fmt.Println("in else, delete")
-				//tw.taskRecords.Delete(task.key)
-				//currentList.Remove(item)
-				tw.removeTaskChannel <- task
-				//tw.removeTask(task)
-				fmt.Println("in else, after delete")
+			}else { //todo how to make it works?
+				//tw.removeTaskChannel <- task
+				go tw.removeTask(task)
 			}
-			next := item.Next()
-			item = next
+
 		}
 	}
 	// 轮盘前进一步
@@ -256,8 +240,8 @@ func (tw *TimeWheel) addTask(task *Task) {
 	tw.taskRecords.Store(task.key, element)
 }
 
-func WriteToMap(key interface{}) {
-	TW.finishedTasks.Store(key, 1)
+func (tw *TimeWheel) WriteToMap(key interface{}) {
+	tw.finishedTasks.Store(key, 1)
 }
 
 //todo 机器宕机之后，读log恢复map
@@ -267,7 +251,6 @@ func traverseMap() {
 
 // 删除任务的内部函数
 func (tw *TimeWheel) removeTask(task *Task) {
-	fmt.Println("removeTask ing")
 	// 从map结构中删除
 	val, _ := tw.taskRecords.Load(task.key)
 	tw.taskRecords.Delete(task.key)
@@ -277,7 +260,7 @@ func (tw *TimeWheel) removeTask(task *Task) {
 	currentList.Remove(val.(*list.Element))
 
 	//write to the local cache
-	WriteToMap(task.key)
+	tw.WriteToMap(task.key)
 
 	data := &WriteDataByLine{
 		StopTime:  time.Now().Unix(),
@@ -288,11 +271,12 @@ func (tw *TimeWheel) removeTask(task *Task) {
 
 	//need to check
 	//write to local log
-	fmt.Println("writeCsvByLine")
-	//writeCsvByLine(Filepath+Filename, data)
-	writeCsvByLine("/Users/wjl/Desktop/Distributed-Timer-Service/src/test/log1.csv", data) //only for testing
+	writeCsvByLine(Filepath+Filename, data)
+
 	//write to other servers' log, mark as completed by paxos
+	//fmt.Println(p.acceptors)
 	value := p.Propose(data)
+
 	//send RPC calls to other severs
 	if value != data { //bugs
 		log.Error("value = %s, excepted %s", value, "hello world")
@@ -302,20 +286,6 @@ func (tw *TimeWheel) removeTask(task *Task) {
 	//	log.Error("learnValue = %s, excepted %s", learnValue, "hello world")
 	//}
 }
-
-//// 该函数通过任务的周期来计算下次执行的位置和圈数
-//func (tw *TimeWheel) getPosAndCircleByInterval(d time.Duration) (int, int) {
-//	delaySeconds := int(d.Seconds())
-//	intervalSeconds := int(tw.interval.Seconds())
-//	circle := delaySeconds / intervalSeconds / tw.slotNums
-//	pos := (tw.currentPos + delaySeconds/intervalSeconds) % tw.slotNums
-//
-//	// 特殊case，当计算的位置和当前位置重叠时，因为当前位置已经走过了，所以circle需要减一
-//	if pos == tw.currentPos && circle != 0 {
-//		circle--
-//	}
-//	return pos, circle
-//}
 
 // 该函数用任务的创建时间来计算下次执行的位置和圈数
 func (tw *TimeWheel) getPosAndCircleByCreatedTime(createdTime time.Time, d time.Duration, key interface{}) (int, int) {
