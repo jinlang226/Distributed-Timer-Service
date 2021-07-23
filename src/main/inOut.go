@@ -101,8 +101,8 @@ func ReadFile(filename string) ([][]string, error) {
 //  写入一行数据
 func writeCsvByLine(path string, dataStruct *WriteDataByLine) error {
 	//todo: bugs might remain, need mutex
-	TW.mutex.Lock()
-	defer TW.mutex.Unlock()
+	//TW.mutex.Lock()
+	//defer TW.mutex.Unlock()
 
 	//OpenFile 读取文件，不存在时则创建，使用追加模式
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
@@ -126,5 +126,6 @@ func writeCsvByLine(path string, dataStruct *WriteDataByLine) error {
 	}
 
 	WriterCsv.Flush() // 刷新，不刷新是无法写入的
+	fmt.Println("writing data !!!!!!")
 	return nil
 }

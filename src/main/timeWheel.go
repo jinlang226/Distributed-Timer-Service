@@ -31,7 +31,6 @@ type TimeWheel struct {
 	// 需要执行的任务，如果时间轮盘上的Task执行同一个Job，可以直接实例化到TimeWheel结构体中。
 	// 此处的优先级低于Task中的Job参数
 	//job       Job
-	wait          chan int
 	isRunning     bool
 	finishedTasks *sync.Map //update according to the logs by RPC
 	mutex         *sync.Mutex
@@ -84,8 +83,8 @@ func New(interval time.Duration, slotNums int) *TimeWheel {
 		stopChannel:       make(chan bool),
 		taskRecords:       &sync.Map{},
 		//job:               job,
-		wait:              make(chan int, 1),
-		isRunning:         false,
+		isRunning:     false,
+		finishedTasks: &sync.Map{},
 	}
 
 	tw.initSlots()
@@ -147,7 +146,6 @@ func (tw *TimeWheel) AddTask(args *AddTaskArgs, reply *AddTaskReply) error {
 		return errors.New("Duplicate task key")
 	}
 
-	tw.wait <- 1
 	tw.addTaskChannel <- &Task{
 		key:         uuid,
 		interval:    interval,
@@ -156,24 +154,6 @@ func (tw *TimeWheel) AddTask(args *AddTaskArgs, reply *AddTaskReply) error {
 		//times:       times,
 	}
 	fmt.Println("successfully add tasks")
-	return nil
-}
-
-// RemoveTask 从时间轮盘删除任务的公共函数
-func (tw *TimeWheel) publicRemoveTask(key interface{}) error {
-	if key == nil {
-		return nil
-	}
-
-	// 检查该Task是否存在
-	val, ok := tw.taskRecords.Load(key)
-	if !ok {
-		return errors.New("Task key doesn't existed in task list, please check your input")
-	}
-
-	task := val.(*list.Element).Value.(*Task)
-	tw.wait <- 1
-	tw.removeTaskChannel <- task
 	return nil
 }
 
@@ -236,32 +216,22 @@ func (tw *TimeWheel) checkAndRunTask() {
 				fmt.Println(fmt.Sprintf("The task %d don't have job to run", task.key))
 			}
 
-			// 执行完成以后，将该任务从时间轮盘删除
-			next := item.Next()
-			tw.taskRecords.Delete(task.key)
-			currentList.Remove(item)
-
-			item = next
-			//// 重新添加任务到时间轮盘，用Task.interval来获取下一次执行的轮盘位置
-			//if task.times != 0 {
-			//	if task.times < 0 {
-			//		tw.addTask(task, true)
-			//	} else {
-			//		task.times--
-			//		tw.addTask(task, true)
-			//	}
-			//
-			//} else {
-			// 将任务从taskRecords中删除
-			//tw.taskRecords.Delete(task.key)
-			//}
-
 			//delete task
 			fmt.Println("call removeTask")
-			err := tw.publicRemoveTask(task.key)
-			if err != nil {
-				panic(err)
+
+			// 检查该Task是否存在
+			_, ok := tw.taskRecords.Load(task.key)
+			if !ok {
+				log.Info(fmt.Sprintf("Task key %d doesn't existed in task list, please check your input", task.key))
+			}else {
+				fmt.Println("in else, delete")
+				//tw.taskRecords.Delete(task.key)
+				//currentList.Remove(item)
+				tw.removeTaskChannel <- task
+				fmt.Println("in else, after delete")
 			}
+			next := item.Next()
+			item = next
 		}
 	}
 	// 轮盘前进一步
@@ -283,14 +253,10 @@ func (tw *TimeWheel) addTask(task *Task) {
 
 	element := tw.slots[pos].PushBack(task)
 	tw.taskRecords.Store(task.key, element)
-
-	defer func() {
-		<-tw.wait
-	}()
 }
 
 func WriteToMap(key interface{}) {
-	TW.finishedTasks.Store(key, 01)
+	TW.finishedTasks.Store(key, 1)
 }
 
 //todo 机器宕机之后，读log恢复map
@@ -323,7 +289,7 @@ func (tw *TimeWheel) removeTask(task *Task) {
 	//write to local log
 	fmt.Println("writeCsvByLine")
 	//writeCsvByLine(Filepath+Filename, data)
-	writeCsvByLine("/Users/wjl/Desktop/Distributed-Timer-Service/src/test", data) //only for testing
+	writeCsvByLine("/Users/wjl/Desktop/Distributed-Timer-Service/src/test/log1.txt", data) //only for testing
 	//write to other servers' log, mark as completed by paxos
 	value := p.Propose(data)
 	//send RPC calls to other severs
@@ -334,10 +300,6 @@ func (tw *TimeWheel) removeTask(task *Task) {
 	//if learnValue != value {
 	//	log.Error("learnValue = %s, excepted %s", learnValue, "hello world")
 	//}
-
-	defer func() {
-		<-tw.wait
-	}()
 }
 
 //// 该函数通过任务的周期来计算下次执行的位置和圈数

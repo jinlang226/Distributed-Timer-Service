@@ -18,7 +18,7 @@ func main() {
 	//BatchRegister()
 
 	fmt.Println(fmt.Sprintf("%v Add task task-5s", time.Now().Format(time.RFC3339)))
-	args := &AddTaskArgs{time.Duration(5) * time.Second, 100, time.Now(), TaskJob}
+	args := &AddTaskArgs{time.Duration(5) * time.Second, 1, time.Now(), TaskJob}
 	reply := AddTaskReply{}
 	err := timeWheel.AddTask(args, &reply)
 	fmt.Println("finish")
@@ -26,21 +26,21 @@ func main() {
 		panic(err)
 	}
 	fmt.Println(fmt.Sprintf("%v Add task task-10s", time.Now().Format(time.RFC3339)))
-	args = &AddTaskArgs{time.Duration(10) * time.Second, 200, time.Now(), TaskJob}
+	args = &AddTaskArgs{time.Duration(10) * time.Second, 2, time.Now(), TaskJob}
 	reply = AddTaskReply{}
 	err = timeWheel.AddTask(args, &reply)
 	fmt.Println("finish")
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(fmt.Sprintf("%v Add task task-20s", time.Now().Format(time.RFC3339)))
-	args = &AddTaskArgs{time.Duration(20) * time.Second, 300, time.Now(), TaskJob}
-	reply = AddTaskReply{}
-	err = timeWheel.AddTask(args, &reply)
-	fmt.Println("finish")
-	if err != nil {
-		panic(err)
-	}
+
+
+	//fmt.Println("Remove task task-5s")
+	//err = timeWheel.publicRemoveTask(100)
+	//if err != nil {
+	//	panic(err)
+	//}
+	defer func() { for {} }()
 }
 
 func TaskJob(key interface{}) {
