@@ -7,8 +7,6 @@ import (
 const Format string = "2006/1/2 15:04:05"
 
 var readFilename = "data.csv"
-
-//var Filepath = "/root/ft_local/Distributed-Timer-Service/src/test"
 var Filepath = "./src/test/"
 var logFilename = "log1.csv"
 
