@@ -8,6 +8,7 @@ const Format string = "2006/1/2 15:04:05"
 
 var readFilename = "1.csv"
 var Filepath = "/Users/wjl/Desktop/Distributed-Timer-Service/src/test/"
+
 //var Filepath = "/root/ft_local/ft_local/Distributed-Timer-Service/src/test/"
 var logFilename = "log1.csv"
 
@@ -19,18 +20,20 @@ const (
 	serverID4 = 4
 )
 
-var AcceptorIds = []int{serverID1, serverID2, serverID3, serverID4}
+var AcceptorIds = []int{serverID2, serverID3, serverID4}
 var LearnerIds = []int{serverID4}
+
+var registerIds = []int{serverID1, serverID3}
 
 const (
 	Socketname0 string = "9.134.131.104" //mVUFd@2873tB
-	Socketname1 string = "9.134.81.172"  //BdKJg@3697Uz //windows
+	//Socketname1 string = "9.134.81.172"  //BdKJg@3697Uz //windows
 	Socketname2 string = "9.134.72.227"  //PMqpN@5628eJ
 	Socketname3 string = "9.135.113.126" //wpgqs*9728Jn
 	Socketname4 string = "9.134.167.39"  //dpksZ*5439Cp
 )
 
-var SocketNames = []string{Socketname0, Socketname1, Socketname2, Socketname3, Socketname4}
+var SocketNames = []string{Socketname0, Socketname2, Socketname3, Socketname4}
 
 //local server name
 var LocalName = Socketname0

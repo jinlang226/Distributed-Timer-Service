@@ -65,10 +65,10 @@ func register(interval time.Duration, uuid int) {
 func backup(args BackupArgs) {
 	reply := BackupReply{}
 
-	if ok := call(Socketname2, "Backup", args, &reply); !ok {
+	if ok := call(SocketNames[registerIds[0]], "Backup", args, &reply); !ok {
 		fmt.Printf("Register: backup register error\n")
 	}
-	if ok := call(Socketname3, "Backup", args, &reply); !ok {
+	if ok := call(SocketNames[registerIds[1]], "Backup", args, &reply); !ok {
 		fmt.Printf("Register: backup register error\n")
 	}
 }

@@ -5,9 +5,10 @@ import (
 	"time"
 )
 
-var a, l, p  = StartPaxos()
+var a, l, p = StartPaxos()
 
 func main() {
+	//time.Sleep(time.Duration(20) * time.Second)
 	timeWheel := CreateTimeWheel(1*time.Second, 60)
 	timeWheel.startTW()
 	fmt.Println("initialize rpc")
@@ -16,7 +17,10 @@ func main() {
 	BatchRegister()
 
 	//test(timeWheel)
-	defer func() { for {} }()
+	defer func() {
+		for {
+		}
+	}()
 }
 
 func TaskJob(key interface{}) {
