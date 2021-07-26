@@ -22,7 +22,7 @@ func Register(interval time.Duration, uuid int) {
 func BatchRegister() {
 	//result, err := ReadFile("/root/ft_local/Distributed-Timer-Service/src/test/test.csv")
 	//only for testing
-	result, err := ReadFile(Filepath+FilenameRead)
+	result, err := ReadFile(Filepath+ readFilename)
 	if err != nil {
 		fmt.Println("err in read file")
 	}

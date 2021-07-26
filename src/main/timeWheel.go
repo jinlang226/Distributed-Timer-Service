@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/go-playground/log"
 	"net"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -176,13 +177,13 @@ func (tw *TimeWheel) start() {
 			// 会造成任务过度集中
 			fmt.Println("=========== case 2: addTask ===========")
 			tw.addTask(task)
-		//case task := <-tw.removeTaskChannel:
-		//	fmt.Println("case 3 ===== ")
-		//	tw.removeTask(task)
-		//case <-tw.stopChannel:
-		//	fmt.Println("case 4 ===== ")
-		//	tw.ticker.Stop()
-		//	return
+			//case task := <-tw.removeTaskChannel:
+			//	fmt.Println("case 3 ===== ")
+			//	tw.removeTask(task)
+			//case <-tw.stopChannel:
+			//	fmt.Println("case 4 ===== ")
+			//	tw.ticker.Stop()
+			//	return
 		}
 	}
 }
@@ -212,7 +213,7 @@ func (tw *TimeWheel) checkAndRunTask() {
 			_, ok := tw.taskRecords.Load(task.key)
 			if !ok {
 				log.Info(fmt.Sprintf("Task key %d doesn't existed in task list, please check your input", task.key))
-			}else { //todo how to make it works?
+			} else { //todo how to make it works?
 				//tw.removeTaskChannel <- task
 				go tw.removeTask(task)
 			}
@@ -244,9 +245,23 @@ func (tw *TimeWheel) WriteToMap(key interface{}) {
 	tw.finishedTasks.Store(key, 1)
 }
 
-//todo 机器宕机之后，读log恢复map
-func traverseMap() {
+//机器宕机之后，读log恢复map
+func (tw *TimeWheel) TraverseMap() {
+	result, err := ReadFile(Filepath + logFilename)
+	if err != nil {
+		fmt.Println("err in read file")
+	}
+	// for each line in csv data structure:
+	for _, items := range result {
+		fmt.Println(items)
+		uuid, err := strconv.Atoi(items[0])
 
+		if err != nil {
+			log.Error(err)
+		}
+		tw.WriteToMap(uuid)
+		fmt.Println(" uuid: ", uuid)
+	}
 }
 
 // 删除任务的内部函数
@@ -271,7 +286,7 @@ func (tw *TimeWheel) removeTask(task *Task) {
 
 	//need to check
 	//write to local log
-	writeCsvByLine(Filepath+Filename, data)
+	writeCsvByLine(Filepath+logFilename, data)
 
 	//write to other servers' log, mark as completed by paxos
 	//fmt.Println(p.acceptors)

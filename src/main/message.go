@@ -6,11 +6,10 @@ import (
 
 const Format string = "2006/1/2 15:04:05"
 
-//var Filename = "log1.csv"
-var FilenameRead = "data.csv"
+var readFilename = "data.csv"
 //var Filepath = "/root/ft_local/Distributed-Timer-Service/src/test"
-var Filepath = "/Users/wjl/Desktop/Distributed-Timer-Service/src/test/"
-var Filename ="log1.csv"
+var Filepath = "/src/test/"
+var logFilename ="log1.csv"
 
 const (
 	serverID1 = 1

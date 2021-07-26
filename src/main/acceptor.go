@@ -50,7 +50,7 @@ func (a *Acceptor) Accept(args *PaxosMsgArgs, reply *PaxosMsgReply) error {
 		reply.Ok = true
 		//todo save value
 
-		writeCsvByLine(Filepath+Filename, args.Value)
+		writeCsvByLine(Filepath+logFilename, args.Value)
 		// 后台转发接受的提案给学习者
 		//for _, lid := range a.learners {
 		//	go func(learner int) {
