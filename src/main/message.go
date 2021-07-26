@@ -25,10 +25,10 @@ var LearnerIds = []int{serverID4}
 
 const (
 	Socketname0 string = "9.134.131.104" //mVUFd@2873tB
+	Socketname1 string = "9.134.131.104"
 	Socketname2 string = "9.134.72.227"  //PMqpN@5628eJ
 	Socketname3 string = "9.135.113.126" //wpgqs*9728Jn
 	Socketname4 string = "9.134.167.39"  //dpksZ*5439Cp
-	Socketname1 string = "9.134.131.104"
 )
 
 var SocketNames = []string{Socketname0, Socketname1, Socketname2, Socketname3, Socketname4}

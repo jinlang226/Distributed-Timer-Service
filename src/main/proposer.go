@@ -32,7 +32,6 @@ func (p *Proposer) Propose(v *WriteDataByLine) interface{} {
 			Value:  v,
 		}
 		reply := PaxosMsgReply{}
-		fmt.Println(aid, "==========")
 
 		err := call(SocketNames[aid], "Acceptor.Prepare", args, &reply)
 		if !err {

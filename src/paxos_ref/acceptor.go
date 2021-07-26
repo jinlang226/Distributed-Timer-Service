@@ -32,15 +32,15 @@ func newAcceptor(id int, learners []int) *Acceptor {
 }
 
 func (a *Acceptor) Prepare(args *MsgArgs, reply *MsgReply) error {
-	fmt.Println("1 promised " , a.promiseNumber)
-	fmt.Println("1 args ", args.Number)
+	//fmt.Println("1 promised " , a.promiseNumber)
+	//fmt.Println("1 args ", args.Number)
 	if args.Number > a.promiseNumber {
 		a.promiseNumber = args.Number
-		fmt.Println(a.promiseNumber)
+		//fmt.Println(a.promiseNumber)
 		reply.Number = a.acceptedNumber
-		fmt.Println(a.acceptedNumber)
+		//fmt.Println(a.acceptedNumber)
 		reply.Value = a.acceptedValue
-		fmt.Println(a.acceptedValue)
+		//fmt.Println(a.acceptedValue)
 		reply.Ok = true
 	} else {
 		reply.Ok = false
