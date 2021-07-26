@@ -20,15 +20,12 @@ func Register(interval time.Duration, uuid int) {
 
 // scan the csv
 func BatchRegister() {
-	//result, err := ReadFile("/root/ft_local/Distributed-Timer-Service/src/test/test.csv")
-	//only for testing
 	result, err := ReadFile(Filepath+ readFilename)
 	if err != nil {
 		fmt.Println("err in read file")
 	}
 	//for each line in csv data structure:
 	for _, items := range result {
-		//fmt.Println(items)
 		d, err := strconv.Atoi(items[1])
 		if err != nil {
 			log.Error(err)
@@ -40,7 +37,6 @@ func BatchRegister() {
 		}
 		fmt.Println("duration: ", duration, " uuid: ", uuid)
 		Register(duration, uuid)
-		//}
 	}
 }
 
@@ -61,7 +57,6 @@ func register(interval time.Duration, uuid int) {
 	args := &AddTaskArgs{interval, uuid, time.Now(), TaskJob}
 	reply := AddTaskReply{}
 	err := TW.AddTask(args, &reply)
-	//fmt.Println(reply.stupid)
 	if err != nil {
 		panic(err)
 	}
@@ -69,14 +64,7 @@ func register(interval time.Duration, uuid int) {
 
 func backup(args BackupArgs) {
 	reply := BackupReply{}
-	// call method is defined in
-	//for _, socketName := range SocketNames {
-	//	if socketName != LocalName {
-	//		if ok := call(socketName, "Backup", args, &reply); !ok {
-	//			fmt.Printf("Register: backup register error\n")
-	//		}
-	//	}
-	//}
+
 	if ok := call(Socketname2, "Backup", args, &reply); !ok {
 		fmt.Printf("Register: backup register error\n")
 	}

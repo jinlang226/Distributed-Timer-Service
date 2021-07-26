@@ -289,7 +289,7 @@ func (tw *TimeWheel) removeTask(task *Task) {
 	writeCsvByLine(Filepath+logFilename, data)
 
 	//write to other servers' log, mark as completed by paxos
-	//fmt.Println(p.acceptors)
+	//fmt.Println(data)
 	value := p.Propose(data)
 
 	//send RPC calls to other severs

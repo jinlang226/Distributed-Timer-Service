@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-playground/log"
 )
 
 type Proposer struct {
@@ -31,21 +32,13 @@ func (p *Proposer) Propose(v *WriteDataByLine) interface{} {
 			Value:  v,
 		}
 		reply := PaxosMsgReply{}
-		//data := &WriteDataByLine{
-		//	StopTime:  -1,
-		//	TaskId:    -1,
-		//	Duration:  -1,
-		//	StartTime: -1,
-		//}
-		//reply := PaxosMsgReply{
-		//	Value: data,
-		//}
-		//todo change the address
-		fmt.Println("before calling")
-		err := call(SocketNames[aid]+":80", "Acceptor.Prepare", args, &reply)
-		fmt.Println("after calling")
+		fmt.Println(aid, "==========")
+
+		err := call(SocketNames[aid], "Acceptor.Prepare", args, &reply)
 		if !err {
 			continue
+		} else {
+			log.Error("Acceptor.Prepare error: %v", err)
 		}
 
 		if reply.Ok {
@@ -73,9 +66,11 @@ func (p *Proposer) Propose(v *WriteDataByLine) interface{} {
 			}
 			reply := PaxosMsgReply{}
 			//todo change the address
-			ok := call(SocketNames[aid]+":80", "Acceptor.Accept", args, &reply)
-			if !ok {
+			err := call(SocketNames[aid], "Acceptor.Accept", args, &reply)
+			if !err {
 				continue
+			} else {
+				log.Error("Acceptor.Prepare error: %v", err)
 			}
 
 			if reply.Ok {
