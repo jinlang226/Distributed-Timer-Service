@@ -20,7 +20,7 @@ func Register(interval time.Duration, uuid int) {
 
 // scan the csv
 func BatchRegister() {
-	result, err := ReadFile(Filepath+ readFilename)
+	result, err := ReadFile(Filepath + readFilename)
 	if err != nil {
 		fmt.Println("err in read file")
 	}

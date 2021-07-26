@@ -230,7 +230,7 @@ func (tw *TimeWheel) checkAndRunTask() {
 
 // 添加任务的内部函数
 // @param task       Task  Task对象
-// @param byInterval bool  生成Task在时间轮盘位置和圈数的方式，true表示利用Task.interval来生成，false表示利用Task.createTime生成
+// Task.createTime生成
 func (tw *TimeWheel) addTask(task *Task) {
 	pos, circle := tw.getPosAndCircleByCreatedTime(task.createdTime, task.interval, task.key)
 
@@ -241,12 +241,12 @@ func (tw *TimeWheel) addTask(task *Task) {
 	tw.taskRecords.Store(task.key, element)
 }
 
-func (tw *TimeWheel) WriteToMap(key interface{}) {
-	tw.finishedTasks.Store(key, 1)
+func WriteToMap(key interface{}) {
+	TW.finishedTasks.Store(key, 1)
 }
 
 //机器宕机之后，读log恢复map
-func (tw *TimeWheel) TraverseMap() {
+func TraverseMap() {
 	result, err := ReadFile(Filepath + logFilename)
 	if err != nil {
 		fmt.Println("err in read file")
@@ -259,7 +259,7 @@ func (tw *TimeWheel) TraverseMap() {
 		if err != nil {
 			log.Error(err)
 		}
-		tw.WriteToMap(uuid)
+		WriteToMap(uuid)
 		fmt.Println(" uuid: ", uuid)
 	}
 }
@@ -275,7 +275,7 @@ func (tw *TimeWheel) removeTask(task *Task) {
 	currentList.Remove(val.(*list.Element))
 
 	//write to the local cache
-	tw.WriteToMap(task.key)
+	WriteToMap(task.key)
 
 	data := &WriteDataByLine{
 		StopTime:  time.Now().Unix(),
@@ -304,13 +304,10 @@ func (tw *TimeWheel) removeTask(task *Task) {
 
 // 该函数用任务的创建时间来计算下次执行的位置和圈数
 func (tw *TimeWheel) getPosAndCircleByCreatedTime(createdTime time.Time, d time.Duration, key interface{}) (int, int) {
-	passedTime := time.Since(createdTime)
-	passedSeconds := int(passedTime.Seconds())
 	delaySeconds := int(d.Seconds())
 	intervalSeconds := int(tw.interval.Seconds())
-
 	circle := delaySeconds / intervalSeconds / tw.slotNums
-	pos := (tw.currentPos + (delaySeconds-(passedSeconds%delaySeconds))/intervalSeconds) % tw.slotNums
+	pos := (tw.currentPos + delaySeconds/intervalSeconds) % tw.slotNums
 
 	// 特殊case，当计算的位置和当前位置重叠时，因为当前位置已经走过了，所以circle需要减一
 	if pos == tw.currentPos && circle != 0 {
