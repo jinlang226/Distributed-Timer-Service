@@ -6,7 +6,7 @@ import (
 
 const Format string = "2006/1/2 15:04:05"
 
-var readFilename = "data.csv"
+var readFilename = "1.csv"
 var Filepath = "./src/test/"
 var logFilename = "log1.csv"
 
