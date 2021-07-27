@@ -33,7 +33,7 @@ func (p *Proposer) Propose(v *WriteDataByLine) interface{} {
 		}
 		reply := PaxosMsgReply{}
 
-		err := call(SocketNames[aid], "Prepare", args, &reply)
+		err := call(SocketNames[aid], "Acceptor.Prepare", args, &reply)
 		if !err {
 			continue
 		} else {
@@ -65,7 +65,7 @@ func (p *Proposer) Propose(v *WriteDataByLine) interface{} {
 			}
 			reply := PaxosMsgReply{}
 			//todo change the address
-			err := call(SocketNames[aid], "Accept", args, &reply)
+			err := call(SocketNames[aid], "Acceptor.Accept", args, &reply)
 			if !err {
 				continue
 			} else {
