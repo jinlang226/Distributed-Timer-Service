@@ -6,10 +6,9 @@ import (
 
 const Format string = "2006/1/2 15:04:05"
 
-var readFilename = "1.csv"
+var readFilename = "test1.csv"
 var Filepath = "/Users/wjl/Desktop/Distributed-Timer-Service/src/test/"
-
-//var Filepath = "/root/ft_local/ft_local/Distributed-Timer-Service/src/test/"
+//var Filepath = "/root/ft_local/Distributed-Timer-Service/src/test/"
 var logFilename = "log1.csv"
 
 const (
@@ -20,7 +19,8 @@ const (
 	serverID4 = 4
 )
 
-var AcceptorIds = []int{serverID2, serverID3, serverID4}
+var AcceptorIds = []int{serverID2}
+//, serverID3, serverID4
 var LearnerIds = []int{serverID4}
 
 var registerIds = []int{serverID1, serverID3}
@@ -33,7 +33,7 @@ const (
 	Socketname4 string = "9.134.167.39"  //dpksZ*5439Cp
 )
 
-var SocketNames = []string{Socketname0, Socketname2, Socketname3, Socketname4}
+var SocketNames = []string{Socketname0, Socketname2, Socketname2, Socketname3, Socketname4}
 
 //local server name
 var LocalName = Socketname0

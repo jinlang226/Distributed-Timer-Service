@@ -42,7 +42,7 @@ func BatchRegister() {
 
 // rpc calling, public method
 // finish tasks from other server
-func Backup(args *BackupArgs, reply *BackupReply) error {
+func (tw *TimeWheel) Backup(args *BackupArgs, reply *BackupReply) error {
 	uuid := args.Uuid
 	interval := args.Interval
 	register(interval, uuid)
@@ -64,11 +64,12 @@ func register(interval time.Duration, uuid int) {
 
 func backup(args BackupArgs) {
 	reply := BackupReply{}
-
-	if ok := call(SocketNames[registerIds[0]], "Backup", args, &reply); !ok {
+	//fmt.Println(SocketNames[registerIds[0]])
+	if ok := call(Socketname2, "TimeWheel.Backup", args, &reply); !ok {
+		//if ok := call(SocketNames[registerIds[0]], "Backup", args, &reply); !ok {
 		fmt.Printf("Register: backup register error\n")
 	}
-	if ok := call(SocketNames[registerIds[1]], "Backup", args, &reply); !ok {
-		fmt.Printf("Register: backup register error\n")
-	}
+	//if ok := call(SocketNames[registerIds[1]], "Backup", args, &reply); !ok {
+	//	fmt.Printf("Register: backup register error\n")
+	//}
 }

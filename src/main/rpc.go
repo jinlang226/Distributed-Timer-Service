@@ -46,7 +46,7 @@ type PaxosMsgReply struct {
 func (tw *TimeWheel) serverTW() {
 	rpcs := rpc.NewServer()
 	rpcs.Register(tw)
-	lis, err := net.Listen("tcp", ":80")
+	lis, err := net.Listen("tcp", ":8000")
 	if err != nil {
 		log.Error("listen error 1:", err)
 	}
@@ -68,11 +68,12 @@ func (tw *TimeWheel) serverTW() {
 // returns false if something goes wrong.
 //
 func call(sockname string, rpcname string, args interface{}, reply interface{}) bool {
-	c, err := rpc.Dial("tcp", sockname+":80")
+	c, err := rpc.Dial("tcp", fmt.Sprintf("%s:8006", sockname))
 	if err != nil {
 		log.Error("dialing:", err)
 	}
 	defer c.Close()
+	fmt.Println("!!!c: " , c)
 
 	err = c.Call(rpcname, args, reply)
 	if err == nil {

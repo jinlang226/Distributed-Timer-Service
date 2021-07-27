@@ -290,12 +290,12 @@ func (tw *TimeWheel) removeTask(task *Task) {
 
 	//write to other servers' log, mark as completed by paxos
 	//fmt.Println(data)
-	value := p.Propose(data)
+	//value := p.Propose(data)
 
 	//send RPC calls to other severs
-	if value != data { //bugs
-		log.Error("value = %s, excepted %s", value, "hello world")
-	}
+	//if value != data { //bugs
+	//	log.Error("value = %s, excepted %s", value, "hello world")
+	//}
 	//learnValue := learners[0].Chosen()
 	//if learnValue != value {
 	//	log.Error("learnValue = %s, excepted %s", learnValue, "hello world")
