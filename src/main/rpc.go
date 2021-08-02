@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/go-playground/log"
+	"github.com/go-playground/log/v7"
 	"net"
 	"net/rpc"
 	"time"
@@ -46,7 +46,7 @@ type PaxosMsgReply struct {
 func (tw *TimeWheel) serverTW() {
 	rpcs := rpc.NewServer()
 	rpcs.Register(tw)
-	lis, err := net.Listen("tcp", ":8000")
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port1))
 	if err != nil {
 		log.Error("listen error 1:", err)
 	}
@@ -67,19 +67,20 @@ func (tw *TimeWheel) serverTW() {
 // usually returns true.
 // returns false if something goes wrong.
 //
-func call(sockname string, rpcname string, args interface{}, reply interface{}) bool {
-	c, err := rpc.Dial("tcp", fmt.Sprintf("%s:8006", sockname))
+func call(sockname string, rpcname string, args interface{}, reply interface{}, port string) bool {
+	c, err := rpc.Dial("tcp", fmt.Sprintf("%s:%s", port, sockname))
 	if err != nil {
 		log.Error("dialing:", err)
 	}
 	defer c.Close()
-	fmt.Println("!!!c: " , c)
 
 	err = c.Call(rpcname, args, reply)
 	if err == nil {
 		return true
 	}
 
-	fmt.Printf("calling:%s::%s() error: %s\n", sockname, rpcname, err)
+	fmt.Printf("calling:%s::%s() error: %v\n", sockname, rpcname, err)
+	log.Error("rpc call err: ", err)
+
 	return false
 }

@@ -57,6 +57,7 @@ type Task struct {
 	job Job
 	// 任务需要执行的次数，如果需要一直执行，设置成-1
 	//times int
+	stopTime int64
 }
 
 var once sync.Once
@@ -215,6 +216,7 @@ func (tw *TimeWheel) checkAndRunTask() {
 				log.Info(fmt.Sprintf("Task key %d doesn't existed in task list, please check your input", task.key))
 			} else { //todo how to make it works?
 				//tw.removeTaskChannel <- task
+				task.stopTime = time.Now().Unix()
 				go tw.removeTask(task)
 			}
 
@@ -278,7 +280,7 @@ func (tw *TimeWheel) removeTask(task *Task) {
 	WriteToMap(task.key)
 
 	data := &WriteDataByLine{
-		StopTime:  time.Now().Unix(),
+		StopTime:  task.stopTime,
 		TaskId:    task.key,
 		Duration:  task.interval,
 		StartTime: task.createdTime.Unix(),
@@ -289,8 +291,8 @@ func (tw *TimeWheel) removeTask(task *Task) {
 	writeCsvByLine(Filepath+logFilename, data)
 
 	//write to other servers' log, mark as completed by paxos
-	//fmt.Println(data)
-	//value := p.Propose(data)
+	fmt.Println(data)
+	go p.Propose(data)
 
 	//send RPC calls to other severs
 	//if value != data { //bugs

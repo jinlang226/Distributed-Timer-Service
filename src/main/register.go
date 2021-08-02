@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/go-playground/log"
+	"github.com/go-playground/log/v7"
 	"strconv"
 	"time"
 )
@@ -22,7 +22,7 @@ func Register(interval time.Duration, uuid int) {
 func BatchRegister() {
 	result, err := ReadFile(Filepath + readFilename)
 	if err != nil {
-		fmt.Println("err in read file")
+		log.Error("err in read file %v", err)
 	}
 	//for each line in csv data structure:
 	for _, items := range result {
@@ -35,7 +35,7 @@ func BatchRegister() {
 		if err != nil {
 			log.Error(err)
 		}
-		fmt.Println("duration: ", duration, " uuid: ", uuid)
+		log.Info("duration: ", duration, " uuid: ", uuid)
 		Register(duration, uuid)
 	}
 }
@@ -53,21 +53,21 @@ func (tw *TimeWheel) Backup(args *BackupArgs, reply *BackupReply) error {
 
 // register tasks
 func register(interval time.Duration, uuid int) {
-	fmt.Println(fmt.Sprintf("%s Add Task ID: %d", time.Now().Format(Format), uuid))
+	log.Info(fmt.Sprintf("%s Add Task ID: %d", time.Now().Format(Format), uuid))
 	args := &AddTaskArgs{interval, uuid, time.Now(), TaskJob}
 	reply := AddTaskReply{}
 	err := TW.AddTask(args, &reply)
 	if err != nil {
-		panic(err)
+		log.Error(err)
 	}
 }
 
 func backup(args BackupArgs) {
 	reply := BackupReply{}
 	//fmt.Println(SocketNames[registerIds[0]])
-	if ok := call(Socketname2, "TimeWheel.Backup", args, &reply); !ok {
+	if ok := call(Socketname2, "TimeWheel.Backup", args, &reply, port1); !ok {
 		//if ok := call(SocketNames[registerIds[0]], "Backup", args, &reply); !ok {
-		fmt.Printf("Register: backup register error\n")
+		log.Error("call not ok ", ok)
 	}
 	//if ok := call(SocketNames[registerIds[1]], "Backup", args, &reply); !ok {
 	//	fmt.Printf("Register: backup register error\n")

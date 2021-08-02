@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/csv"
 	"fmt"
-	"github.com/go-playground/log"
+	"github.com/go-playground/log/v7"
 	"os"
 	"strconv"
 	"time"
@@ -32,7 +32,7 @@ import (
 func ReadFile(filename string) ([][]string, error) {
 	csvFile, err := os.Open(filename)
 	if err != nil {
-		fmt.Printf("read file error: %v", err)
+		log.Error("read file error: %v", err)
 		return nil, err
 	}
 	defer csvFile.Close()

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
-	"github.com/go-playground/log"
+	"github.com/go-playground/log/v7"
+	"strconv"
 )
 
 type Proposer struct {
@@ -17,9 +17,10 @@ type Proposer struct {
 }
 
 func (p *Proposer) Propose(v *WriteDataByLine) interface{} {
-	fmt.Println("paxos propose")
 	p.round++
 	p.number = p.proposalNumber()
+
+
 
 	// 第一阶段(phase 1)
 	prepareCount := 0
@@ -33,11 +34,11 @@ func (p *Proposer) Propose(v *WriteDataByLine) interface{} {
 		}
 		reply := PaxosMsgReply{}
 
-		err := call(SocketNames[aid], "Acceptor.Prepare", args, &reply)
+		err := call(SocketNames[aid], "Acceptor.Prepare", args, &reply, strconv.Itoa(aid+60))
 		if !err {
 			continue
 		} else {
-			log.Error("Acceptor.Prepare error: %v", err)
+			log.Info("Acceptor.Prepare:", err)
 		}
 
 		if reply.Ok {
@@ -65,11 +66,11 @@ func (p *Proposer) Propose(v *WriteDataByLine) interface{} {
 			}
 			reply := PaxosMsgReply{}
 			//todo change the address
-			err := call(SocketNames[aid], "Acceptor.Accept", args, &reply)
+			err := call(SocketNames[aid], "Acceptor.Accept", args, &reply, strconv.Itoa(aid+60))
 			if !err {
 				continue
 			} else {
-				log.Error("Acceptor.Prepare error: %v", err)
+				log.Info("Acceptor.Prepare:", err)
 			}
 
 			if reply.Ok {

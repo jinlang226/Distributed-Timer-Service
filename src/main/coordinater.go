@@ -3,7 +3,7 @@ package main
 // 启动接受者和学习者 RPC 服务
 func start(acceptorIds []int, learnerIds []int) ([]*Acceptor, []*Learner) {
 	acceptors := make([]*Acceptor, 0)
-	for _, aid := range acceptorIds {
+	for _, aid := range listenIds {
 		a := newAcceptor(aid, learnerIds)
 		acceptors = append(acceptors, a)
 	}

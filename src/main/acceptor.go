@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"net/rpc"
+	"time"
 )
 
 type Acceptor struct {
@@ -48,9 +49,15 @@ func (a *Acceptor) Accept(args *PaxosMsgArgs, reply *PaxosMsgReply) error {
 		a.acceptedNumber = args.Number
 		a.acceptedValue = args.Value
 		reply.Ok = true
-		//todo save value
 
-		writeCsvByLine(Filepath+logFilename, args.Value)
+		fmt.Println("accept value: ", args.Value)
+		_, existed := TW.finishedTasks.Load(args.Value.TaskId)
+		if !existed {
+			fmt.Println("write to csv during paxos!!!!!!!")
+			writeCsvByLine(Filepath+logFilename, args.Value)
+			WriteToMap(args.Value.TaskId)
+		}
+		fmt.Println("already existed, ", time.Now().Format(Format))
 		// 后台转发接受的提案给学习者
 		//for _, lid := range a.learners {
 		//	go func(learner int) {
@@ -74,8 +81,9 @@ func (a *Acceptor) Accept(args *PaxosMsgArgs, reply *PaxosMsgReply) error {
 func (a *Acceptor) server() {
 	rpcs := rpc.NewServer()
 	rpcs.Register(a)
-	addr := fmt.Sprintf(":%d", a.id)
+	addr := fmt.Sprintf(":6%d", a.id)
 	l, e := net.Listen("tcp", addr)
+	//l, e := net.Listen("tcp", fmt.Sprintf(":%s", port2))
 	if e != nil {
 		log.Fatal("listen error 3:", e)
 	}

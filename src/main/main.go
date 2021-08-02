@@ -2,18 +2,41 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-playground/log/v7"
+	"github.com/go-playground/log/v7/handlers/console"
+	"os"
 	"time"
 )
 
 var a, l, p = StartPaxos()
 
 func main() {
+	//initialize logs
+	cLog := console.New(true)
+	log.AddHandler(cLog, log.AllLevels...)
+
+	// Trace
+	defer log.WithTrace().Info("time to run")
+
+	//delete old log file
+	err := os.Remove(Filepath+logFilename) //删除文件test.txt
+	if err != nil {
+		//如果删除失败则输出 file remove Error!
+		fmt.Println("file remove Error!")
+		//输出错误详细信息
+		fmt.Printf("%s", err)
+	} else {
+		//如果删除成功则输出 file remove OK!
+		fmt.Print("file remove OK!")
+	}
+
 	//time.Sleep(time.Duration(20) * time.Second)
 	timeWheel := CreateTimeWheel(1*time.Second, 60)
 	timeWheel.startTW()
-	fmt.Println("initialize rpc")
+	log.Info("initialize rpc")
 	timeWheel.serverTW()
-	fmt.Println("start Batch register")
+	log.Info("start Batch register")
+	time.Sleep(time.Duration(5) * time.Second)
 	BatchRegister()
 
 	//test(timeWheel)

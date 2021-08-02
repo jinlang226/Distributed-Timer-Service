@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net"
 	"net/rpc"
@@ -67,8 +66,7 @@ func (l *Learner) majority() int {
 func (l *Learner) server(id int) {
 	rpcs := rpc.NewServer()
 	rpcs.Register(l)
-	addr := fmt.Sprintf(":%d", id)
-	lis, e := net.Listen("tcp", addr)
+	lis, e := net.Listen("tcp", ":8007")
 	if e != nil {
 		log.Fatal("listen error 4:", e)
 	}
