@@ -8,7 +8,7 @@ import (
 )
 
 type Acceptor struct {
-	lis  net.Listener
+	lis net.Listener
 	// 服务器 id
 	id int
 	// 接受者承诺的提案编号，如果为 0 表示接受者没有收到过任何 Prepare 消息
@@ -24,7 +24,7 @@ type Acceptor struct {
 
 func newAcceptor(id int, learners []int) *Acceptor {
 	acceptor := &Acceptor{
-		id: id,
+		id:       id,
 		learners: learners,
 	}
 	acceptor.server()
@@ -32,15 +32,15 @@ func newAcceptor(id int, learners []int) *Acceptor {
 }
 
 func (a *Acceptor) Prepare(args *MsgArgs, reply *MsgReply) error {
-	//fmt.Println("1 promised " , a.promiseNumber)
-	//fmt.Println("1 args ", args.Number)
+	fmt.Println("Prepare from ", args.From, " to ", args.To)
+	fmt.Println("args.num ", args.Number, "a.promise ", a.promiseNumber)
 	if args.Number > a.promiseNumber {
 		a.promiseNumber = args.Number
-		//fmt.Println(a.promiseNumber)
+		fmt.Println("prepare promiseNumber ", a.promiseNumber)
 		reply.Number = a.acceptedNumber
-		//fmt.Println(a.acceptedNumber)
+		fmt.Println("prepare accepted number ", a.acceptedNumber)
 		reply.Value = a.acceptedValue
-		//fmt.Println(a.acceptedValue)
+		fmt.Println("prepare acceptedValue ", a.acceptedValue)
 		reply.Ok = true
 	} else {
 		reply.Ok = false
@@ -49,12 +49,16 @@ func (a *Acceptor) Prepare(args *MsgArgs, reply *MsgReply) error {
 }
 
 func (a *Acceptor) Accept(args *MsgArgs, reply *MsgReply) error {
-	fmt.Println("2 promised " , a.promiseNumber)
-	fmt.Println("2 args ", args.Number)
+	fmt.Println("Accept from ", args.From, " to ", args.To)
+	fmt.Println("args.num ", args.Number, "a.promise ", a.promiseNumber)
 	if args.Number >= a.promiseNumber {
 		a.promiseNumber = args.Number
 		a.acceptedNumber = args.Number
 		a.acceptedValue = args.Value
+		fmt.Println("accept promised number ", a.promiseNumber)
+		fmt.Println("accept args number ", args.Number)
+		fmt.Println("accepted value ", a.acceptedValue)
+
 		reply.Ok = true
 		// 后台转发接受的提案给学习者
 		for _, lid := range a.learners {
@@ -75,7 +79,7 @@ func (a *Acceptor) Accept(args *MsgArgs, reply *MsgReply) error {
 	return nil
 }
 
-func (a *Acceptor) server()  {
+func (a *Acceptor) server() {
 	rpcs := rpc.NewServer()
 	rpcs.Register(a)
 	addr := fmt.Sprintf(":%d", a.id)

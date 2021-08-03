@@ -1,6 +1,7 @@
 package paxos_ref
 
 import (
+	"fmt"
 	"net/rpc"
 )
 
@@ -22,6 +23,7 @@ type MsgReply struct {
 }
 
 func call(srv string, name string, args interface{}, reply interface{}) bool {
+	fmt.Println("in call")
 	c, err := rpc.Dial("tcp", srv)
 	if err != nil {
 		return false

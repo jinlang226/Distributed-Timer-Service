@@ -14,20 +14,22 @@ type Proposer struct {
 }
 
 func (p *Proposer) propose(v interface{}) interface{} {
+	fmt.Println("origin v is ", v)
 	p.round++
+	fmt.Println("round", p.round)
 	p.number = p.proposalNumber()
 
 	// 第一阶段(phase 1)
 	prepareCount := 0
 	maxNumber := 0
-	for i, aid := range p.acceptors {
+	for _, aid := range p.acceptors {
 		args := MsgArgs{
 			Number: p.number,
 			From:   p.id,
 			To:     aid,
 		}
 		reply := new(MsgReply)
-		fmt.Println(i, "========")
+		fmt.Println(aid, "++++++++")
 		err := call(fmt.Sprintf("127.0.0.1:%d", aid), "Acceptor.Prepare", args, &reply)
 		if !err {
 			continue
@@ -38,18 +40,23 @@ func (p *Proposer) propose(v interface{}) interface{} {
 			if reply.Number > maxNumber {
 				maxNumber = reply.Number
 				v = reply.Value
+				fmt.Println("!!!!!!!!!!!v is: ", v)
 			}
 		}
 		
 		if prepareCount == p.majority() {
+			fmt.Println("break ahead")
 			break
 		}
 	}
 
+	fmt.Println("phase 2: =====")
+	fmt.Println(v)
 	// 第二阶段(phase 2)
 	acceptCount := 0
 	if prepareCount >= p.majority() {
 		for _, aid := range p.acceptors {
+			fmt.Println(aid, "!!!!!!!!")
 			args := MsgArgs{
 				Number: p.number,
 				Value: v,
