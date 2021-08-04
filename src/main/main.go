@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/go-playground/log/v7"
-	"github.com/go-playground/log/v7/handlers/console"
 	"os"
 	"time"
+
+	"github.com/go-playground/log/v7"
+	"github.com/go-playground/log/v7/handlers/console"
 )
 
 var a, l, p = StartPaxos()
@@ -19,7 +20,7 @@ func main() {
 	defer log.WithTrace().Info("time to run")
 
 	//delete old log file
-	err := os.Remove(Filepath+logFilename) //删除文件test.txt
+	err := os.Remove(Filepath + logFilename) //删除文件test.txt
 	if err != nil {
 		//如果删除失败则输出 file remove Error!
 		fmt.Println("file remove Error!")

@@ -4,7 +4,7 @@ import (
 	"container/list"
 	"errors"
 	"fmt"
-	"github.com/go-playground/log"
+	"github.com/go-playground/log/v7"
 	"net"
 	"strconv"
 	"sync"
@@ -292,8 +292,20 @@ func (tw *TimeWheel) removeTask(task *Task) {
 
 	//write to other servers' log, mark as completed by paxos
 	fmt.Println(data)
-	go p.Propose(data)
+	value := p.Propose(data)
+	log.Info("propose value is: ", value)
 
+	p.round = 0
+	p.id = 1
+	p.number = 0
+
+	for _, singleA := range a {
+		singleA.promiseNumber = 0
+		singleA.acceptedValue = nil
+		singleA.acceptedNumber = 0
+	}
+
+	log.Info("value is: ", data)
 	//send RPC calls to other severs
 	//if value != data { //bugs
 	//	log.Error("value = %s, excepted %s", value, "hello world")

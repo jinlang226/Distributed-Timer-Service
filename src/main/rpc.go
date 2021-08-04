@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/go-playground/log/v7"
 	"net"
 	"net/rpc"
 	"time"
+
+	"github.com/go-playground/log/v7"
 )
 
 type AddTaskArgs struct {
@@ -68,7 +69,9 @@ func (tw *TimeWheel) serverTW() {
 // returns false if something goes wrong.
 //
 func call(sockname string, rpcname string, args interface{}, reply interface{}, port string) bool {
-	c, err := rpc.Dial("tcp", fmt.Sprintf("%s:%s", port, sockname))
+	fmt.Println(fmt.Sprintf("%s:%s", sockname, port))
+	c, err := rpc.Dial("tcp", fmt.Sprintf("%s:%s", sockname, port))
+	fmt.Println("client is: ", c)
 	if err != nil {
 		log.Error("dialing:", err)
 	}

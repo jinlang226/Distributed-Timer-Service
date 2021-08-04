@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/go-playground/log/v7"
 	"strconv"
+
+	"github.com/go-playground/log/v7"
 )
 
 type Proposer struct {
@@ -19,8 +20,7 @@ type Proposer struct {
 func (p *Proposer) Propose(v *WriteDataByLine) interface{} {
 	p.round++
 	p.number = p.proposalNumber()
-
-
+	log.Info(" p.round: ", p.round, " p.number: ", p.number)
 
 	// 第一阶段(phase 1)
 	prepareCount := 0
@@ -34,7 +34,9 @@ func (p *Proposer) Propose(v *WriteDataByLine) interface{} {
 		}
 		reply := PaxosMsgReply{}
 
+		log.Info("before prepare, and the value is: ", args.Value)
 		err := call(SocketNames[aid], "Acceptor.Prepare", args, &reply, strconv.Itoa(aid+60))
+		log.Info("after prepare, and the value is: ", args.Value)
 		if !err {
 			continue
 		} else {
@@ -57,7 +59,9 @@ func (p *Proposer) Propose(v *WriteDataByLine) interface{} {
 	// 第二阶段(phase 2)
 	acceptCount := 0
 	if prepareCount >= p.majority() {
+		log.Info("phase two before for loop")
 		for _, aid := range p.acceptors {
+			log.Info("aid is ", aid)
 			args := PaxosMsgArgs{
 				Number: p.number,
 				Value:  v,
@@ -66,11 +70,13 @@ func (p *Proposer) Propose(v *WriteDataByLine) interface{} {
 			}
 			reply := PaxosMsgReply{}
 			//todo change the address
+			log.Info("before accept, and the value is: ", args.Value)
 			err := call(SocketNames[aid], "Acceptor.Accept", args, &reply, strconv.Itoa(aid+60))
+			log.Info("after accept, and the value is: ", args.Value)
 			if !err {
 				continue
 			} else {
-				log.Info("Acceptor.Prepare:", err)
+				log.Info("Acceptor.Accept:", err)
 			}
 
 			if reply.Ok {
@@ -84,6 +90,7 @@ func (p *Proposer) Propose(v *WriteDataByLine) interface{} {
 		//todo save locally
 		return v
 	}
+	log.Info("after accept")
 	return nil
 }
 
