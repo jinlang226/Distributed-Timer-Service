@@ -17,6 +17,19 @@ func start(acceptorIds []int, learnerIds []int) ([]*Acceptor, []*Learner) {
 	return acceptors, learners
 }
 
+//// 清除数据
+//func clean(p []*Proposer, a []*Acceptor, l []*Learner) {
+//	for _, i := range p {
+//		i.clean()
+//	}
+//	for _, i := range a {
+//		i.clean()
+//	}
+//	for _, i := range l {
+//		i.clean()
+//	}
+//}
+
 func cleanup(acceptors []*Acceptor, learners []*Learner) {
 	for _, a := range acceptors {
 		a.close()
