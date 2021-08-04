@@ -106,7 +106,6 @@ func TestTwoProposers() {
 
 	for _, a := range acceptors {
 		a.promiseNumber = 0
-		a.acceptedValue = 0
 		a.acceptedValue = nil
 		a.acceptedNumber = 0
 	}
@@ -114,7 +113,6 @@ func TestTwoProposers() {
 	fmt.Println("after clean !123849012378490173491207384291073894107 3849712398")
 	v4 := p1.propose("wtf")
 	fmt.Println("!!!!!!!!!!!!!!!!!1v4: ", v4)
-
 
 	learnValue := learns[0].chosen()
 	if learnValue != v1 {
