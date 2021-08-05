@@ -9,25 +9,6 @@ import (
 	"time"
 )
 
-//const (
-//	taskName = iota
-//	duration
-//)
-
-// data 读入数据保存map
-//var data map[string]string
-
-//func main() {
-//	if err := readFiles(); err != nil {
-//		log.Error(err)
-//	}
-//	log.Info("read data: ", data)
-//
-//	if err := writeCsv("./testdata/result.csv", data); err != nil {
-//		log.Error(err)
-//	}
-//}
-
 // ReadFile reads csv file
 func ReadFile(filename string) ([][]string, error) {
 	csvFile, err := os.Open(filename)

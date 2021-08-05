@@ -18,21 +18,20 @@ const (
 	serverID2 = 2
 	serverID3 = 3
 	serverID4 = 4
+	proposerID = 1
+	numMachines = 3
 )
 
 var listenIds = []int{serverID0, serverID1, serverID2, serverID3, serverID4}
-
 var AcceptorIds = []int{serverID2}
-
-//, serverID3, serverID4
 var LearnerIds = []int{serverID4}
 
 var registerIds = []int{serverID1, serverID3}
 
 var port1 = "8006"
-var port2 = "8007"
 
 const (
+
 	Socketname0 string = "9.134.131.104" //mVUFd@2873tB
 	//Socketname1 string = "9.134.81.172"  //BdKJg@3697Uz //windows
 	Socketname2 string = "9.134.72.227"  //PMqpN@5628eJ

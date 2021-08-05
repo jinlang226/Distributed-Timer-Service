@@ -46,7 +46,7 @@ func StartPaxos() ([]*Acceptor, []*Learner, *Proposer) {
 
 	// 1 是提议者 id
 	p := &Proposer{
-		id:        1,
+		id:        proposerID,
 		acceptors: AcceptorIds,
 	}
 

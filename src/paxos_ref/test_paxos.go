@@ -99,7 +99,7 @@ func TestTwoProposers() {
 	v1 := p1.propose("hello world")
 	fmt.Println("!!!!!!!!!!!v1: ", v1)
 
-	clean(p1, acceptors)
+	//clean(p1, acceptors)
 	p1.round = 0
 	p1.id = 1
 	p1.number = 0

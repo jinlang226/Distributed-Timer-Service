@@ -15,9 +15,9 @@ func main() {
 	//initialize logs
 	cLog := console.New(true)
 	log.AddHandler(cLog, log.AllLevels...)
-
-	// Trace
 	defer log.WithTrace().Info("time to run")
+
+	//paxos_ref.TestTwoProposers()
 
 	//delete old log file
 	err := os.Remove(Filepath + logFilename) //删除文件test.txt
@@ -31,16 +31,22 @@ func main() {
 		fmt.Print("file remove OK!")
 	}
 
-	//time.Sleep(time.Duration(20) * time.Second)
 	timeWheel := CreateTimeWheel(1*time.Second, 60)
 	timeWheel.startTW()
 	log.Info("initialize rpc")
 	timeWheel.serverTW()
 	log.Info("start Batch register")
 	time.Sleep(time.Duration(5) * time.Second)
-	BatchRegister()
+	BatchRegister(time.Now())
+	time.Sleep(time.Duration(2) * time.Second)
+	//for _, val := range TW.slots {
+	//	for item := val.Front(); item != nil; item = item.Next() {
+	//		log.Info("xjc is stupid@, and item is: ", item.Value.(*Task))
+	//	}
+	//}
 
-	//test(timeWheel)
+	//time.Sleep(time.Duration(5) * time.Second)
+
 	defer func() {
 		for {
 		}

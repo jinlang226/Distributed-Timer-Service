@@ -11,21 +11,22 @@ import (
 func Register(interval time.Duration, uuid int) {
 	register(interval, uuid)
 	//rpc to other servers
-	args := BackupArgs{
-		Interval: interval,
-		Uuid:     uuid,
-	}
-	backup(args)
+	//args := BackupArgs{
+	//	Interval: interval,
+	//	Uuid:     uuid,
+	//}
+	//backup(args)
 }
 
 // scan the csv
-func BatchRegister() {
+func BatchRegister(timeStart time.Time) {
 	result, err := ReadFile(Filepath + readFilename)
 	if err != nil {
 		log.Error("err in read file %v", err)
 	}
 	//for each line in csv data structure:
-	for _, items := range result {
+	for i, items := range result {
+		log.Info("the ", i, " task is registered since ", time.Since(timeStart))
 		d, err := strconv.Atoi(items[1])
 		if err != nil {
 			log.Error(err)

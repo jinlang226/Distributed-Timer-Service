@@ -2,6 +2,7 @@ package main
 
 import (
 	"strconv"
+	"sync"
 
 	"github.com/go-playground/log/v7"
 )
@@ -15,10 +16,12 @@ type Proposer struct {
 	number int
 	// 接受者 id 列表
 	acceptors []int
+
+	mutex sync.Mutex
 }
 
 func (p *Proposer) Propose(v *WriteDataByLine) interface{} {
-	p.round++
+	p.round = p.round + numMachines
 	p.number = p.proposalNumber()
 	log.Info(" p.round: ", p.round, " p.number: ", p.number)
 

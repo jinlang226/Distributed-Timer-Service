@@ -96,7 +96,7 @@ func New(interval time.Duration, slotNums int) *TimeWheel {
 // Start 启动时间轮盘
 func (tw *TimeWheel) startTW() {
 	tw.ticker = time.NewTicker(tw.interval)
-	go tw.start()
+	go tw.start(time.Now())
 	tw.isRunning = true
 }
 
@@ -135,7 +135,7 @@ func (tw *TimeWheel) startTW() {
 func (tw *TimeWheel) AddTask(args *AddTaskArgs, reply *AddTaskReply) error {
 	interval := args.interval
 	key := args.taskJob
-	createdTime := args.execTime
+	//createdTime := args.execTime
 	uuid := args.uuid
 	if interval <= 0 || key == nil {
 		return errors.New("Invalid task params")
@@ -146,11 +146,10 @@ func (tw *TimeWheel) AddTask(args *AddTaskArgs, reply *AddTaskReply) error {
 	if exist {
 		return errors.New("Duplicate task key")
 	}
-
 	tw.addTaskChannel <- &Task{
 		key:         uuid,
 		interval:    interval,
-		createdTime: createdTime,
+		createdTime: time.Now(),
 		//job:         job,
 		//times:       times,
 	}
@@ -166,11 +165,11 @@ func (tw *TimeWheel) initSlots() {
 }
 
 // 启动时间轮盘的内部函数
-func (tw *TimeWheel) start() {
+func (tw *TimeWheel) start(startTime time.Time) {
 	for {
 		select {
 		case <-tw.ticker.C:
-			fmt.Println("=========== case 1: ticker ===========")
+			fmt.Println("=========== case 1: ticker ===========, and time is: ", time.Since(startTime))
 			tw.checkAndRunTask()
 		case task := <-tw.addTaskChannel:
 			// 此处利用Task.createTime来定位任务在时间轮盘的位置和执行圈数
@@ -197,6 +196,8 @@ func (tw *TimeWheel) checkAndRunTask() {
 	if currentList != nil {
 		for item := currentList.Front(); item != nil; {
 			task := item.Value.(*Task)
+			//fmt.Println("created task: ", task.key, "task time: ", task.interval.Seconds(), ", created time: ", task.createdTime.Format(Format))
+			//fmt.Println("stop now: ", time.Now().Format(Format))
 			// 如果圈数>0，表示还没到执行时间，更新圈数
 			_, existed := tw.finishedTasks.Load(task.key)
 			if existed {
@@ -217,7 +218,7 @@ func (tw *TimeWheel) checkAndRunTask() {
 			} else { //todo how to make it works?
 				//tw.removeTaskChannel <- task
 				task.stopTime = time.Now().Unix()
-				go tw.removeTask(task)
+				tw.removeTask(task)
 			}
 
 		}
@@ -268,6 +269,8 @@ func TraverseMap() {
 
 // 删除任务的内部函数
 func (tw *TimeWheel) removeTask(task *Task) {
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
 	// 从map结构中删除
 	val, _ := tw.taskRecords.Load(task.key)
 	tw.taskRecords.Delete(task.key)
@@ -286,34 +289,16 @@ func (tw *TimeWheel) removeTask(task *Task) {
 		StartTime: task.createdTime.Unix(),
 	}
 
-	//need to check
 	//write to local log
 	writeCsvByLine(Filepath+logFilename, data)
 
 	//write to other servers' log, mark as completed by paxos
-	fmt.Println(data)
+	log.Info("origin data is: ", data)
 	value := p.Propose(data)
 	log.Info("propose value is: ", value)
 
-	p.round = 0
-	p.id = 1
+	p.round = proposerID
 	p.number = 0
-
-	for _, singleA := range a {
-		singleA.promiseNumber = 0
-		singleA.acceptedValue = nil
-		singleA.acceptedNumber = 0
-	}
-
-	log.Info("value is: ", data)
-	//send RPC calls to other severs
-	//if value != data { //bugs
-	//	log.Error("value = %s, excepted %s", value, "hello world")
-	//}
-	//learnValue := learners[0].Chosen()
-	//if learnValue != value {
-	//	log.Error("learnValue = %s, excepted %s", learnValue, "hello world")
-	//}
 }
 
 // 该函数用任务的创建时间来计算下次执行的位置和圈数
@@ -327,5 +312,5 @@ func (tw *TimeWheel) getPosAndCircleByCreatedTime(createdTime time.Time, d time.
 	if pos == tw.currentPos && circle != 0 {
 		circle--
 	}
-	return pos, circle
+	return pos-1, circle
 }

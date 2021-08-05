@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"github.com/go-playground/log/v7"
 	"net"
 	"net/rpc"
-	"time"
+	"sync"
 )
 
 type Acceptor struct {
@@ -20,6 +20,7 @@ type Acceptor struct {
 	acceptedValue *WriteDataByLine
 	// 学习者 id 列表
 	learners []int
+	mutex sync.Mutex
 }
 
 func newAcceptor(id int, learners []int) *Acceptor {
@@ -31,11 +32,23 @@ func newAcceptor(id int, learners []int) *Acceptor {
 	return acceptor
 }
 
+func (a *Acceptor) LockAcceptor(args *PaxosMsgArgs, reply *PaxosMsgReply) error {
+	a.mutex.Lock()
+	defer a.mutex.Unlock()
+	return nil
+}
+
 func (a *Acceptor) Prepare(args *PaxosMsgArgs, reply *PaxosMsgReply) error {
+	a.mutex.Lock()
+	fmt.Println("Prepare from ", args.From, " to ", args.To)
+	fmt.Println("args.num ", args.Number, "a.promise ", a.promiseNumber)
 	if args.Number > a.promiseNumber {
 		a.promiseNumber = args.Number
+		fmt.Println("prepare promiseNumber ", a.promiseNumber)
 		reply.Number = a.acceptedNumber
+		fmt.Println("prepare accepted number ", a.acceptedNumber)
 		reply.Value = a.acceptedValue
+		fmt.Println("prepare acceptedValue ", a.acceptedValue)
 		reply.Ok = true
 	} else {
 		reply.Ok = false
@@ -44,6 +57,9 @@ func (a *Acceptor) Prepare(args *PaxosMsgArgs, reply *PaxosMsgReply) error {
 }
 
 func (a *Acceptor) Accept(args *PaxosMsgArgs, reply *PaxosMsgReply) error {
+	defer a.mutex.Unlock()
+	fmt.Println("Accept from ", args.From, " to ", args.To)
+	fmt.Println("args.num ", args.Number, "a.promise ", a.promiseNumber)
 	if args.Number >= a.promiseNumber {
 		a.promiseNumber = args.Number
 		a.acceptedNumber = args.Number
@@ -57,24 +73,13 @@ func (a *Acceptor) Accept(args *PaxosMsgArgs, reply *PaxosMsgReply) error {
 			writeCsvByLine(Filepath+logFilename, args.Value)
 			WriteToMap(args.Value.TaskId)
 		}
-		fmt.Println("already existed, ", time.Now().Format(Format))
-		// 后台转发接受的提案给学习者
-		//for _, lid := range a.learners {
-		//	go func(learner int) {
-		//		//todo change the address
-		//		addr := fmt.Sprintf("127.0.0.1:%d", learner)
-		//		args.From = a.id
-		//		args.To = learner
-		//		resp := new(PaxosMsgReply)
-		//		ok := call(addr, "Learner.Learn", args, resp)
-		//		if !ok {
-		//			return
-		//		}
-		//	}(lid)
-		//}
 	} else {
 		reply.Ok = false
 	}
+	//clean the acceptor
+	a.promiseNumber = 0
+	a.acceptedValue = nil
+	a.acceptedNumber = 0
 	return nil
 }
 
