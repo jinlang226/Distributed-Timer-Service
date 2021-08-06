@@ -34,7 +34,6 @@ type TimeWheel struct {
 	//job       Job
 	isRunning     bool
 	finishedTasks *sync.Map //update according to the logs by RPC
-	finishedTasksOrdinaryMap map[int]int
 	mutex         sync.Mutex
 	lis           net.Listener
 }
@@ -88,7 +87,6 @@ func New(interval time.Duration, slotNums int) *TimeWheel {
 		//job:               job,
 		isRunning:     false,
 		finishedTasks: &sync.Map{},
-		finishedTasksOrdinaryMap: make(map[int]int),
 	}
 
 	tw.initSlots()
@@ -202,7 +200,6 @@ func (tw *TimeWheel) checkAndRunTask() {
 			//fmt.Println("stop now: ", time.Now().Format(Format))
 			// 如果圈数>0，表示还没到执行时间，更新圈数
 			_, existed := tw.finishedTasks.Load(task.key)
-			
 			if existed {
 				continue
 			}
@@ -218,7 +215,7 @@ func (tw *TimeWheel) checkAndRunTask() {
 			_, ok := tw.taskRecords.Load(task.key)
 			if !ok {
 				log.Info(fmt.Sprintf("Task key %d doesn't existed in task list, please check your input", task.key))
-			} else { //todo how to make it works?
+			} else {
 				//tw.removeTaskChannel <- task
 				task.stopTime = time.Now().Unix()
 				tw.taskExe(task)
@@ -249,7 +246,6 @@ func (tw *TimeWheel) addTask(task *Task) {
 
 func WriteToMap(key interface{}) {
 	TW.finishedTasks.Store(key, 1)
-	TW.finishedTasksOrdinaryMap[key.(int)] = 250
 }
 
 //机器宕机之后，读log恢复map
