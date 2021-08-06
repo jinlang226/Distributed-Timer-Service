@@ -34,6 +34,7 @@ type TimeWheel struct {
 	//job       Job
 	isRunning     bool
 	finishedTasks *sync.Map //update according to the logs by RPC
+	finishedTasksOrdinaryMap map[int]int
 	mutex         sync.Mutex
 	lis           net.Listener
 }
@@ -87,6 +88,7 @@ func New(interval time.Duration, slotNums int) *TimeWheel {
 		//job:               job,
 		isRunning:     false,
 		finishedTasks: &sync.Map{},
+		finishedTasksOrdinaryMap: make(map[int]int),
 	}
 
 	tw.initSlots()
@@ -179,7 +181,7 @@ func (tw *TimeWheel) start(startTime time.Time) {
 			tw.addTask(task)
 			//case task := <-tw.removeTaskChannel:
 			//	fmt.Println("case 3 ===== ")
-			//	tw.removeTask(task)
+			//	tw.taskExe(task)
 			//case <-tw.stopChannel:
 			//	fmt.Println("case 4 ===== ")
 			//	tw.ticker.Stop()
@@ -200,6 +202,7 @@ func (tw *TimeWheel) checkAndRunTask() {
 			//fmt.Println("stop now: ", time.Now().Format(Format))
 			// 如果圈数>0，表示还没到执行时间，更新圈数
 			_, existed := tw.finishedTasks.Load(task.key)
+			
 			if existed {
 				continue
 			}
@@ -218,7 +221,7 @@ func (tw *TimeWheel) checkAndRunTask() {
 			} else { //todo how to make it works?
 				//tw.removeTaskChannel <- task
 				task.stopTime = time.Now().Unix()
-				tw.removeTask(task)
+				tw.taskExe(task)
 			}
 
 		}
@@ -246,6 +249,7 @@ func (tw *TimeWheel) addTask(task *Task) {
 
 func WriteToMap(key interface{}) {
 	TW.finishedTasks.Store(key, 1)
+	TW.finishedTasksOrdinaryMap[key.(int)] = 250
 }
 
 //机器宕机之后，读log恢复map
@@ -263,12 +267,12 @@ func TraverseMap() {
 			log.Error(err)
 		}
 		WriteToMap(uuid)
-		fmt.Println(" uuid: ", uuid)
+		fmt.Println("uuid: ", uuid)
 	}
 }
 
 // 删除任务的内部函数
-func (tw *TimeWheel) removeTask(task *Task) {
+func (tw *TimeWheel) taskExe(task *Task) {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 	// 从map结构中删除

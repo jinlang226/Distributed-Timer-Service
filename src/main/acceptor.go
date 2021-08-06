@@ -57,6 +57,8 @@ func (a *Acceptor) Prepare(args *PaxosMsgArgs, reply *PaxosMsgReply) error {
 }
 
 func (a *Acceptor) Accept(args *PaxosMsgArgs, reply *PaxosMsgReply) error {
+	TW.mutex.Lock()
+	defer TW.mutex.Unlock()
 	defer a.mutex.Unlock()
 	fmt.Println("Accept from ", args.From, " to ", args.To)
 	fmt.Println("args.num ", args.Number, "a.promise ", a.promiseNumber)

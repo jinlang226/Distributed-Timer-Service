@@ -10,6 +10,7 @@ import (
 )
 
 var a, l, p = StartPaxos()
+var flock *FileLock
 
 func main() {
 	//initialize logs
@@ -30,6 +31,9 @@ func main() {
 		//如果删除成功则输出 file remove OK!
 		fmt.Print("file remove OK!")
 	}
+
+	//file lock
+	flock = NewFileLock(Filepath+logFilename)
 
 	timeWheel := CreateTimeWheel(1*time.Second, 60)
 	timeWheel.startTW()
