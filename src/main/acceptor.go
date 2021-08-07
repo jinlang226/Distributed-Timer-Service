@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/go-playground/log/v7"
+	"log"
 	"net"
 	"net/rpc"
 	"sync"
@@ -69,8 +70,8 @@ func (a *Acceptor) Accept(args *PaxosMsgArgs, reply *PaxosMsgReply) error {
 		_, existed := TW.finishedTasks.Load(args.Value.TaskId)
 		if !existed {
 			fmt.Println("write to csv during paxos!!!!!!!")
-			writeCsvByLine(Filepath+logFilename, args.Value)
-			WriteToMap(args.Value.TaskId)
+			go writeCsvByLine(Filepath+logFilename, args.Value)
+			go WriteToMap(args.Value.TaskId)
 		}
 	} else {
 		reply.Ok = false
