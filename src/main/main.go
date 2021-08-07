@@ -9,7 +9,7 @@ import (
 	"github.com/go-playground/log/v7/handlers/console"
 )
 
-var a, l, p = StartPaxos()
+var a, p = StartPaxos()
 var flock *FileLock
 
 func main() {

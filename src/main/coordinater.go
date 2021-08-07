@@ -1,34 +1,24 @@
 package main
 
 // 启动接受者和学习者 RPC 服务
-func start(acceptorIds []int, learnerIds []int) ([]*Acceptor, []*Learner) {
+func start(acceptorIds []int) ([]*Acceptor) {
 	acceptors := make([]*Acceptor, 0)
 	for _, aid := range listenIds {
-		a := newAcceptor(aid, learnerIds)
+		a := newAcceptor(aid)
 		acceptors = append(acceptors, a)
 	}
 
-	learners := make([]*Learner, 0)
-	//for _, lid := range learnerIds {
-	//	l := newLearner(lid, acceptorIds)
-	//	learners = append(learners, l)
-	//}
-
-	return acceptors, learners
+	return acceptors
 }
 
-func cleanup(acceptors []*Acceptor, learners []*Learner) {
+func cleanup(acceptors []*Acceptor) {
 	for _, a := range acceptors {
 		a.close()
 	}
-
-	for _, l := range learners {
-		l.close()
-	}
 }
 
-func StartPaxos() ([]*Acceptor, []*Learner, *Proposer) {
-	acceptors, learns := start(AcceptorIds, LearnerIds)
+func StartPaxos() ([]*Acceptor,*Proposer) {
+	acceptors := start(AcceptorIds)
 	//defer cleanup(acceptors, learns)
 
 	// 1 是提议者 id
@@ -37,5 +27,5 @@ func StartPaxos() ([]*Acceptor, []*Learner, *Proposer) {
 		acceptors: AcceptorIds,
 	}
 
-	return acceptors, learns, p
+	return acceptors, p
 }

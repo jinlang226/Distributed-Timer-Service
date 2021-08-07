@@ -23,10 +23,9 @@ type Acceptor struct {
 	mutex    sync.Mutex
 }
 
-func newAcceptor(id int, learners []int) *Acceptor {
+func newAcceptor(id int) *Acceptor {
 	acceptor := &Acceptor{
 		id:       id,
-		learners: learners,
 	}
 	acceptor.server()
 	return acceptor
