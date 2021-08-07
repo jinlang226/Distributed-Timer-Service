@@ -293,9 +293,9 @@ func (tw *TimeWheel) taskExe(task *Task) {
 	writeCsvByLine(Filepath+logFilename, data)
 
 	//write to other servers' log, mark as completed by paxos
-	log.Info("origin data is: ", data)
-	value := p.Propose(data)
-	log.Info("propose value is: ", value)
+	//log.Info("origin data is: ", data)
+	//value := p.Propose(data)
+	//log.Info("propose value is: ", value)
 
 	p.round = proposerID
 	p.number = 0
@@ -311,6 +311,9 @@ func (tw *TimeWheel) getPosAndCircleByCreatedTime(createdTime time.Time, d time.
 	// 特殊case，当计算的位置和当前位置重叠时，因为当前位置已经走过了，所以circle需要减一
 	if pos == tw.currentPos && circle != 0 {
 		circle--
+	}
+	if pos == 0 {
+		pos = slotsNums
 	}
 	return pos-1, circle
 }

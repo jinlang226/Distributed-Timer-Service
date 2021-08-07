@@ -6,7 +6,7 @@ import (
 
 const Format string = "2006/1/2 15:04:05"
 
-var readFilename = "test1.csv"
+var readFilename = "1.csv"
 var Filepath = "/Users/wjl/Desktop/Distributed-Timer-Service/src/test/"
 
 //var Filepath = "/root/ft_local/Distributed-Timer-Service/src/test/"
@@ -20,6 +20,7 @@ const (
 	serverID4 = 4
 	proposerID = 1
 	numMachines = 3
+	slotsNums = 290 //时间轮里面有多少slots
 )
 
 var listenIds = []int{serverID0, serverID1, serverID2, serverID3, serverID4}
@@ -31,7 +32,6 @@ var registerIds = []int{serverID1, serverID3}
 var port1 = "8006"
 
 const (
-
 	Socketname0 string = "9.134.131.104" //mVUFd@2873tB
 	//Socketname1 string = "9.134.81.172"  //BdKJg@3697Uz //windows
 	Socketname2 string = "9.134.72.227"  //PMqpN@5628eJ

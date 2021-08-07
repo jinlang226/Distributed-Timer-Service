@@ -35,21 +35,19 @@ func main() {
 	//file lock
 	flock = NewFileLock(Filepath+logFilename)
 
-	timeWheel := CreateTimeWheel(1*time.Second, 60)
+	timeWheel := CreateTimeWheel(1*time.Second, slotsNums)
 	timeWheel.startTW()
 	log.Info("initialize rpc")
 	timeWheel.serverTW()
 	log.Info("start Batch register")
 	time.Sleep(time.Duration(5) * time.Second)
 	BatchRegister(time.Now())
-	time.Sleep(time.Duration(2) * time.Second)
 	//for _, val := range TW.slots {
 	//	for item := val.Front(); item != nil; item = item.Next() {
 	//		log.Info("xjc is stupid@, and item is: ", item.Value.(*Task))
 	//	}
 	//}
 
-	//time.Sleep(time.Duration(5) * time.Second)
 
 	defer func() {
 		for {

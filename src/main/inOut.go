@@ -15,11 +15,13 @@ type FileLock struct {
 	dir string
 	f   *os.File
 }
+
 func NewFileLock(dir string) *FileLock {
 	return &FileLock{
 		dir: dir,
 	}
 }
+
 //加锁
 func (l *FileLock) Lock() error {
 	f, err := os.Open(l.dir)
@@ -33,12 +35,12 @@ func (l *FileLock) Lock() error {
 	}
 	return nil
 }
+
 //释放锁
 func (l *FileLock) Unlock() error {
 	defer l.f.Close()
 	return syscall.Flock(int(l.f.Fd()), syscall.LOCK_UN)
 }
-
 
 // ReadFile reads csv file
 func ReadFile(filename string) ([][]string, error) {
@@ -58,11 +60,11 @@ func ReadFile(filename string) ([][]string, error) {
 //  写入一行数据
 func writeCsvByLine(path string, dataStruct *WriteDataByLine) error {
 	//todo: bugs might remain, need mutex
-	err := flock.Lock()
-	defer flock.Unlock()
-	if err != nil {
-		log.Error("file lock err: ", err.Error())
-	}
+	//err := flock.Lock()
+	//defer flock.Unlock()
+	//if err != nil {
+	//	log.Error("file lock err: ", err.Error())
+	//}
 
 	//OpenFile 读取文件，不存在时则创建，使用追加模式
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
@@ -76,9 +78,11 @@ func writeCsvByLine(path string, dataStruct *WriteDataByLine) error {
 
 	startTime := strconv.Itoa(int(dataStruct.StartTime))
 	stopTime := strconv.Itoa(int(dataStruct.StopTime))
-	taskId:=fmt.Sprintf("%v", dataStruct.TaskId)
-	duration:= strconv.Itoa(int(dataStruct.Duration)/int(time.Second))
-	dataLine := []string{taskId, duration, startTime, stopTime}
+	taskId := fmt.Sprintf("%v", dataStruct.TaskId)
+	duration := strconv.Itoa(int(dataStruct.Duration) / int(time.Second))
+	res := int(dataStruct.StopTime) - int(dataStruct.StartTime)
+	stringRes := strconv.Itoa(res)
+	dataLine := []string{taskId, duration, startTime, stopTime, stringRes}
 
 	// 写数据
 	if err := WriterCsv.Write(dataLine); err != nil {
