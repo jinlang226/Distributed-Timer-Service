@@ -1,5 +1,5 @@
 # Distributed-Timer-Service
-Tencent Q-Learning Group Project
+Tencent Q-Learning Project
 
 [paxos](https://github.com/tangwz/paxos/tree/rpc)
 
